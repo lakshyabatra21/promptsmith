@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Promptsmith - Design professional high-accuracy ChatGPT prompts utilizing RTFC, CARE, and CREATE frameworks.">
+    <title>Promptsmith // Professional AI Prompt Architect</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- SVG Gradients Definition -->
+    <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
+        <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#a855f7" />
+            <stop offset="100%" stop-color="#06b6d4" />
+        </linearGradient>
+    </svg>
+
+    <!-- Canvas for Technical AI Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- API Settings Modal -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>API Settings</h3>
+                <button id="close-modal-btn" class="close-btn">&times;</button>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.45;">
+                Input your API key to execute your prompt directly inside the app. If left blank, Promptsmith will run in <strong>Simulation Mode</strong> using high-fidelity pre-compiled models for presets.
+            </p>
+            <div class="modal-body">
+                <div class="input-group" style="margin-bottom: 1rem;">
+                    <label for="gemini-key-input">Gemini API Key</label>
+                    <input type="password" id="gemini-key-input" class="concept-input" placeholder="AIzaSy..." autocomplete="off" style="font-size: 0.9rem; padding: 0.75rem 1rem;">
+                </div>
+                <div class="input-group" style="margin-bottom: 1.5rem;">
+                    <label for="openai-key-input">OpenAI API Key</label>
+                    <input type="password" id="openai-key-input" class="concept-input" placeholder="sk-proj-..." autocomplete="off" style="font-size: 0.9rem; padding: 0.75rem 1rem;">
+                </div>
+                <div class="action-bar" style="justify-content: flex-end; margin-top: 0;">
+                    <button id="save-keys-btn" class="btn btn-primary" style="flex-grow:0; padding: 0.65rem 1.5rem; font-size: 0.9rem; min-width: 120px;">Save Configuration</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="logo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+            <span>Promptsmith</span>
+            <span class="badge">PRO</span>
+        </div>
+        <div class="header-actions">
+            <!-- Sidebar toggle button -->
+            <button id="toggle-sidebar-btn" class="header-btn" title="Toggle Sidebar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+                <span>Sidebar</span>
+            </button>
+            <!-- API Keys Settings button -->
+            <button id="settings-btn" class="header-btn" title="API Settings">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <span>API Keys</span>
+            </button>
+            <a href="https://chatgpt.com" target="_blank" rel="noopener" class="chatgpt-link">Open ChatGPT &rarr;</a>
+        </div>
+    </header>
+
+    <main class="app-layout">
+        <!-- SIDEBAR: SAVED & HISTORY -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h3>Library & History</h3>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="section-title">
+                    <span>Saved Prompts</span>
+                    <span id="saved-count" class="count-badge">0</span>
+                </div>
+                <div id="saved-list" class="sidebar-list">
+                    <div class="empty-state">No saved prompts yet. Click "Save to Library" on a generated prompt to store it.</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-title">
+                    <span>Recent History</span>
+                    <button id="clear-history-btn" class="text-link-btn">Clear</button>
+                </div>
+                <div id="history-list" class="sidebar-list">
+                    <div class="empty-state">Your recent generations will appear here.</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN APP CONTENT AREA -->
+        <div class="app-container">
+            <!-- MIDDLE PANEL: ARCHITECT INPUTS -->
+            <section class="card">
+                <!-- Framework Selector Tabs -->
+                <div class="framework-selector">
+                    <button type="button" class="framework-tab active" data-framework="rtfc">
+                        <strong>RTFC</strong>
+                        <span>Role Task Format Constraints</span>
+                    </button>
+                    <button type="button" class="framework-tab" data-framework="care">
+                        <strong>CARE</strong>
+                        <span>Context Action Result Example</span>
+                    </button>
+                    <button type="button" class="framework-tab" data-framework="create">
+                        <strong>CREATE</strong>
+                        <span>Character Request Examples Adjust Extras</span>
+                    </button>
+                </div>
+
+                <div class="input-section">
+                    <!-- Concept Input -->
+                    <div class="input-group">
+                        <div class="label-wrapper">
+                            <label for="concept-input">Define Concept / Term</label>
+                            <span class="info-tooltip" data-tooltip="The core subject, theory, vocabulary, or system you want explained.">?</span>
+                        </div>
+                        <div class="concept-input-container">
+                            <input type="text" id="concept-input" class="concept-input" placeholder="e.g., Quantum Computing, Photosynthesis, Inflation..." autocomplete="off">
+                            <button id="clear-input-btn" class="clear-btn" title="Clear input">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Persona Selector -->
+                    <div class="input-group">
+                        <div class="label-wrapper">
+                            <label>Target Persona</label>
+                            <span class="info-tooltip" data-tooltip="Defines the tone, vocabulary, and educational style of the AI.">?</span>
+                        </div>
+                        <div class="option-grid">
+                            <label class="option-card">
+                                <input type="radio" name="persona" value="expert" checked>
+                                <div class="option-content">
+                                    <span class="option-icon">🎓</span>
+                                    <span>Rigorous Expert</span>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="persona" value="eli5">
+                                <div class="option-content">
+                                    <span class="option-icon">👶</span>
+                                    <span>ELI5 Educator</span>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="persona" value="socratic">
+                                <div class="option-content">
+                                    <span class="option-icon">🤔</span>
+                                    <span>Socratic Guide</span>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="persona" value="analyst">
+                                <div class="option-content">
+                                    <span class="option-icon">💡</span>
+                                    <span>Analogy Master</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Depth Selector -->
+                    <div class="input-group">
+                        <div class="label-wrapper">
+                            <label>Explanation Depth</label>
+                            <span class="info-tooltip" data-tooltip="Controls length and technical detail level of the response.">?</span>
+                        </div>
+                        <div class="depth-selector">
+                            <button type="button" class="depth-btn active" data-depth="overview">Overview</button>
+                            <button type="button" class="depth-btn" data-depth="detailed">Detailed</button>
+                            <button type="button" class="depth-btn" data-depth="deepdive">Deep Dive</button>
+                        </div>
+                    </div>
+
+                    <!-- Formatting Output -->
+                    <div class="input-group">
+                        <div class="label-wrapper">
+                            <label>Output Structure</label>
+                            <span class="info-tooltip" data-tooltip="Configures layout output: nested points, question-answers, tables, or standard formats.">?</span>
+                        </div>
+                        <div class="option-grid">
+                            <label class="option-card">
+                                <input type="radio" name="format" value="markdown" checked>
+                                <div class="option-content">
+                                    <span class="option-icon">📝</span>
+                                    <span>Markdown Doc</span>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="format" value="qa">
+                                <div class="option-content">
+                                    <span class="option-icon">💬</span>
+                                    <span>Interactive Q&A</span>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="format" value="mindmap">
+                                <div class="option-content">
+                                    <span class="option-icon">🌿</span>
+                                    <span>Mindmap Outline</span>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="radio" name="format" value="cheat">
+                                <div class="option-content">
+                                    <span class="option-icon">⚡</span>
+                                    <span>Cheat Sheet</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Add-ons / Checkboxes -->
+                    <div class="input-group">
+                        <div class="label-wrapper">
+                            <label>Include in Output</label>
+                            <span class="info-tooltip" data-tooltip="Additional sub-modules to enrich the AI's explanation.">?</span>
+                        </div>
+                        <div class="option-grid">
+                            <label class="option-card">
+                                <input type="checkbox" id="add-analogy" checked>
+                                <div class="option-content">
+                                    <span class="option-icon">🎭</span>
+                                    <span>Analogy</span>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="checkbox" id="add-misconception" checked>
+                                <div class="option-content">
+                                    <span class="option-icon">⚠️</span>
+                                    <span>Misconceptions</span>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="checkbox" id="add-examples" checked>
+                                <div class="option-content">
+                                    <span class="option-icon">🚀</span>
+                                    <span>Use Cases</span>
+                                </div>
+                            </label>
+                            <label class="option-card">
+                                <input type="checkbox" id="add-quiz">
+                                <div class="option-content">
+                                    <span class="option-icon">✏️</span>
+                                    <span>Self-Quiz</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT PANEL: LIVE OUTPUT & TUTOR -->
+            <section class="card output-card">
+                <div class="output-header">
+                    <div class="tabs-container">
+                        <button type="button" class="tab-link active" data-tab="prompt-tab">Prompt Code</button>
+                        <button type="button" class="tab-link" data-tab="tutor-tab">AI Tutor Workspace</button>
+                    </div>
+                    
+                    <!-- Manual Edit Toggle Switch (Only visible for Prompt tab) -->
+                    <div id="manual-edit-wrapper" class="toggle-container">
+                        <span class="toggle-label">Manual Edit</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="edit-toggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Warning Banner for Edit mode -->
+                <div id="edit-warning" class="warning-banner">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    <span>Manual Override Active: Changes made here will not be updated by left-side selectors.</span>
+                </div>
+
+                <div class="preview-container">
+                    <!-- Tab Content 1: Prompt Code -->
+                    <textarea id="prompt-output" class="prompt-textarea" placeholder="Configure a concept to begin..."></textarea>
+                    
+                    <!-- Tab Content 2: AI Tutor Workspace -->
+                    <div id="tutor-container" class="tutor-view-panel" style="display:none;">
+                        <!-- Loader Animation -->
+                        <div id="tutor-loader" class="loader-container">
+                            <div class="brain-pulse-ring">
+                                <div class="brain-dot"></div>
+                            </div>
+                            <span class="loader-text">Querying AI Tutor Engine...</span>
+                        </div>
+                        
+                        <!-- Markdown text content output -->
+                        <div id="tutor-content" class="tutor-markdown-body">
+                            <div class="empty-state">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--secondary); margin-bottom: 0.75rem;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                                <h4>Playground Idle</h4>
+                                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem; max-width: 320px; line-height: 1.4;">Enter a concept, configure your parameters, and click <strong>"Run in Tutor"</strong> below to fetch an interactive AI learning session.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live stats bar -->
+                <div class="stats-bar">
+                    <div class="stat-item">
+                        <span class="stat-label">Tokens:</span>
+                        <span id="stat-tokens" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Words:</span>
+                        <span id="stat-words" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Framework:</span>
+                        <span id="stat-framework" class="stat-value text-glow">RTFC</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Complexity:</span>
+                        <span id="stat-complexity" class="stat-value">Low</span>
+                    </div>
+                </div>
+
+                <div class="action-bar">
+                    <button id="copy-btn" class="btn btn-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span>Copy Prompt</span>
+                    </button>
+                    <button id="run-tutor-btn" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        <span>Run in Tutor</span>
+                    </button>
+                    <button id="save-library-btn" class="btn btn-secondary" style="flex-grow:0;" title="Save Prompt to Library">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                    </button>
+                    <button id="reset-btn" class="btn btn-secondary" style="flex-grow:0;">Reset</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- PRESET SUGGESTIONS SECTION -->
+    <section class="presets-container">
+        <h3 style="font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.5rem;">Quick Start Presets</h3>
+        <div id="presets-grid" class="presets-grid">
+            <!-- Preset items loaded by JS -->
+        </div>
+    </section>
+
+    <!-- Copy/Save Toast Notification -->
+    <div id="toast" class="toast">Action Complete!</div>
+
+    <footer>
+        <p>&copy; 2026 Promptsmith. Professional Prompt Engineering Utility.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
