@@ -298,7 +298,6 @@ document.addEventListener("DOMContentLoaded", () => {
         settingsModal.classList.remove("active");
     });
 
-    // Close modal clicking outside the card
     settingsModal.addEventListener("click", (e) => {
         if (e.target === settingsModal) {
             settingsModal.classList.remove("active");
@@ -632,7 +631,7 @@ Ensure high accuracy. Let's think step-by-step.`;
         
         // Show loader, clear previous content
         tutorLoader.style.display = "flex";
-        tutorContent.style.innerHTML = "";
+        tutorContent.innerHTML = "";
         tutorContent.style.display = "none";
 
         const geminiKey = localStorage.getItem(LOCAL_GEMINI_KEY);
@@ -746,10 +745,8 @@ Ensure high accuracy. Let's think step-by-step.`;
         tutorLoader.style.display = "none";
         tutorContent.style.display = "block";
         
-        // Parse basic markdown to HTML
         let parsedHTML = parseMarkdown(rawText);
         
-        // Render with simple fade-in stream effect
         tutorContent.innerHTML = parsedHTML;
         tutorContent.scrollTop = 0;
     }
@@ -802,7 +799,6 @@ Ensure high accuracy. Let's think step-by-step.`;
                     const optionEl = e.currentTarget;
                     const qIdx = optionEl.dataset.q;
                     
-                    // Clear selected siblings
                     document.querySelectorAll(`.quiz-option[data-q="${qIdx}"]`).forEach(sibling => {
                         sibling.classList.remove("selected");
                     });
@@ -834,7 +830,6 @@ Ensure high accuracy. Let's think step-by-step.`;
             const selected = document.querySelector(`.quiz-option[data-q="${qIdx}"].selected`);
             const selectedIndex = parseInt(selected.dataset.o);
             
-            // Highlight options
             document.querySelectorAll(`.quiz-option[data-q="${qIdx}"]`).forEach(opt => {
                 const optIndex = parseInt(opt.dataset.o);
                 opt.style.pointerEvents = "none"; // lock input
@@ -846,7 +841,6 @@ Ensure high accuracy. Let's think step-by-step.`;
                 }
             });
 
-            // Reveal explanation
             document.getElementById(`explain-${qIdx}`).style.display = "block";
         });
 
@@ -889,7 +883,7 @@ Ensure high accuracy. Let's think step-by-step.`;
         if (!concept || !text) return;
 
         const customName = prompt(`Enter a label for this saved prompt:`, `Prompt: ${concept} (${currentFramework.toUpperCase()})`);
-        if (customName === null) return; // Cancelled
+        if (customName === null) return;
         
         const label = customName.trim() || `Prompt: ${concept}`;
         
