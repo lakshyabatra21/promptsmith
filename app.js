@@ -50,6 +50,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const statFramework = document.getElementById("stat-framework");
     const statComplexity = document.getElementById("stat-complexity");
     
+    // Header telemetry elements
+    const tickerLoad = document.getElementById("ticker-load");
+    const tickerAlign = document.getElementById("ticker-align");
+    
     // Sidebar list elements
     const savedList = document.getElementById("saved-list");
     const historyList = document.getElementById("history-list");
@@ -277,6 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loadAPIKeys();
         resetForm();
         initBgAnimation();
+        setupDiagnosticsLoop();
     }
 
     // Load saved keys from LocalStorage
@@ -549,6 +554,23 @@ Ensure high accuracy. Let's think step-by-step.`;
         }
     }
 
+    // -------------------------------------------------------------
+    // 6. Header Diagnostics Ticker Telemetry
+    // -------------------------------------------------------------
+    function setupDiagnosticsLoop() {
+        // CPU load telemetry fluctuation simulation
+        setInterval(() => {
+            const mockLoad = Math.floor(Math.random() * 25) + 5; // 5% to 30%
+            tickerLoad.textContent = `LOAD: ${mockLoad}%`;
+        }, 3000);
+        
+        // Spotlight Mouse tracking
+        document.addEventListener("mousemove", (e) => {
+            document.body.style.setProperty("--mouse-x", `${e.clientX}px`);
+            document.body.style.setProperty("--mouse-y", `${e.clientY}px`);
+        });
+    }
+
     function getInclusions() {
         let inclusions = [];
         if (addAnalogy.checked) inclusions.push("A clear, relatable analogy matching the concept to an everyday process.");
@@ -559,7 +581,7 @@ Ensure high accuracy. Let's think step-by-step.`;
     }
 
     // -------------------------------------------------------------
-    // 6. Statistics Engine
+    // 7. Statistics Engine
     // -------------------------------------------------------------
     function updateStats() {
         const text = promptOutput.value;
@@ -570,6 +592,7 @@ Ensure high accuracy. Let's think step-by-step.`;
         statTokens.textContent = tokenEstimate;
         statWords.textContent = wordCount;
         statFramework.textContent = currentFramework.toUpperCase();
+        tickerAlign.textContent = `FRAME: ${currentFramework.toUpperCase()}`;
 
         let score = 0;
         if (currentDepth === "detailed") score += 1;
@@ -587,7 +610,7 @@ Ensure high accuracy. Let's think step-by-step.`;
     }
 
     // -------------------------------------------------------------
-    // 7. Manual Edit Mode
+    // 8. Manual Edit Mode
     // -------------------------------------------------------------
     editToggle.addEventListener("change", (e) => {
         manualEditMode = e.target.checked;
@@ -615,7 +638,7 @@ Ensure high accuracy. Let's think step-by-step.`;
     });
 
     // -------------------------------------------------------------
-    // 8. AI Tutor Execution Engine (Simulated & Live Keys)
+    // 9. AI Tutor Execution Engine (Simulated & Live Keys)
     // -------------------------------------------------------------
     runTutorBtn.addEventListener("click", () => {
         executeTutorSession();
@@ -626,10 +649,8 @@ Ensure high accuracy. Let's think step-by-step.`;
         const prompt = promptOutput.value;
         if (!concept || !prompt) return;
 
-        // Switch to tutor playground workspace tab
         switchTab("tutor-tab");
         
-        // Show loader, clear previous content
         tutorLoader.style.display = "flex";
         tutorContent.innerHTML = "";
         tutorContent.style.display = "none";
@@ -637,22 +658,17 @@ Ensure high accuracy. Let's think step-by-step.`;
         const geminiKey = localStorage.getItem(LOCAL_GEMINI_KEY);
         const openaiKey = localStorage.getItem(LOCAL_OPENAI_KEY);
 
-        // Check if simulation exists for this preset
         const simKey = concept.toLowerCase();
         
         if (geminiKey) {
-            // Live Gemini API Query
             fetchGeminiAPI(geminiKey, prompt);
         } else if (openaiKey) {
-            // Live OpenAI API Query
             fetchOpenAIAPI(openaiKey, prompt);
         } else if (tutorSimulations[simKey]) {
-            // Pre-baked Simulation fallback
             setTimeout(() => {
                 renderSimulationTutor(tutorSimulations[simKey]);
-            }, 1800); // realistic think timer
+            }, 1800);
         } else {
-            // Error: No API Keys & No Simulation available
             setTimeout(() => {
                 tutorLoader.style.display = "none";
                 tutorContent.style.display = "block";
@@ -672,7 +688,6 @@ Ensure high accuracy. Let's think step-by-step.`;
         }
     }
 
-    // Fetch Live Response from Gemini API
     function fetchGeminiAPI(apiKey, prompt) {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
         
@@ -696,7 +711,6 @@ Ensure high accuracy. Let's think step-by-step.`;
         });
     }
 
-    // Fetch Live Response from OpenAI API
     function fetchOpenAIAPI(apiKey, prompt) {
         const url = "https://api.openai.com/v1/chat/completions";
         
@@ -740,25 +754,21 @@ Ensure high accuracy. Let's think step-by-step.`;
         `;
     }
 
-    // Render Live Markdown Response
     function renderMarkdownTutor(rawText) {
         tutorLoader.style.display = "none";
         tutorContent.style.display = "block";
         
         let parsedHTML = parseMarkdown(rawText);
-        
         tutorContent.innerHTML = parsedHTML;
         tutorContent.scrollTop = 0;
     }
 
-    // Render Pre-compiled Simulation tutor card (with Interactive Quiz grading)
     function renderSimulationTutor(simulation) {
         tutorLoader.style.display = "none";
         tutorContent.style.display = "block";
         tutorContent.innerHTML = simulation.html;
         tutorContent.scrollTop = 0;
 
-        // Render Quiz if enabled
         if (addQuiz.checked && simulation.quiz) {
             const quizContainer = document.createElement("div");
             quizContainer.className = "quiz-container";
@@ -782,7 +792,6 @@ Ensure high accuracy. Let's think step-by-step.`;
                 quizContainer.appendChild(questionEl);
             });
 
-            // Submit Button
             const submitBtn = document.createElement("button");
             submitBtn.className = "quiz-submit-btn";
             submitBtn.textContent = "Submit Answers";
@@ -793,7 +802,6 @@ Ensure high accuracy. Let's think step-by-step.`;
             quizContainer.appendChild(submitBtn);
             tutorContent.appendChild(quizContainer);
 
-            // Bind click options selections
             document.querySelectorAll(".quiz-option").forEach(opt => {
                 opt.addEventListener("click", (e) => {
                     const optionEl = e.currentTarget;
@@ -809,7 +817,6 @@ Ensure high accuracy. Let's think step-by-step.`;
         }
     }
 
-    // Grade Interactive MCQ Quizzes
     function gradeSimulationQuiz(questions, submitBtn) {
         let allAnswered = true;
         
@@ -825,14 +832,13 @@ Ensure high accuracy. Let's think step-by-step.`;
             return;
         }
 
-        // Grade
         questions.forEach((q, qIdx) => {
             const selected = document.querySelector(`.quiz-option[data-q="${qIdx}"].selected`);
             const selectedIndex = parseInt(selected.dataset.o);
             
             document.querySelectorAll(`.quiz-option[data-q="${qIdx}"]`).forEach(opt => {
                 const optIndex = parseInt(opt.dataset.o);
-                opt.style.pointerEvents = "none"; // lock input
+                opt.style.pointerEvents = "none";
                 
                 if (optIndex === q.correctIndex) {
                     opt.classList.add("correct");
@@ -851,31 +857,19 @@ Ensure high accuracy. Let's think step-by-step.`;
         showToast("Quiz Graded! Check explanations.");
     }
 
-    // Standard markdown regex parser
     function parseMarkdown(md) {
         let html = md;
-        
-        // Headers
         html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
         html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-        
-        // Code Blocks
         html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
-        
-        // Inline codes
         html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-        
-        // Bold
         html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-        
-        // Linebreaks
         html = html.replace(/\n$/gim, '<br>');
-        
         return html;
     }
 
     // -------------------------------------------------------------
-    // 9. Persistence Operations (LocalStorage)
+    // 10. Persistence Operations (LocalStorage)
     // -------------------------------------------------------------
     saveLibraryBtn.addEventListener("click", () => {
         const concept = conceptInput.value.trim();
@@ -955,7 +949,6 @@ Ensure high accuracy. Let's think step-by-step.`;
 
         savedCount.textContent = saved.length;
 
-        // Render Saved List
         savedList.innerHTML = "";
         if (saved.length === 0) {
             savedList.innerHTML = `<div class="empty-state">No saved prompts yet. Click "Save to Library" on a generated prompt to store it.</div>`;
@@ -975,7 +968,6 @@ Ensure high accuracy. Let's think step-by-step.`;
                 </div>
             `).join("");
 
-            // Click listener for Saved load/delete
             document.querySelectorAll("#saved-list .sidebar-item").forEach(el => {
                 el.addEventListener("click", (e) => {
                     const deleteBtn = e.target.closest(".sidebar-item-delete");
@@ -990,7 +982,6 @@ Ensure high accuracy. Let's think step-by-step.`;
             });
         }
 
-        // Render History List
         historyList.innerHTML = "";
         if (history.length === 0) {
             historyList.innerHTML = `<div class="empty-state">Your recent generations will appear here.</div>`;
@@ -1007,7 +998,6 @@ Ensure high accuracy. Let's think step-by-step.`;
                 </div>
             `).join("");
 
-            // Click listener for history load
             document.querySelectorAll("#history-list .sidebar-item").forEach(el => {
                 el.addEventListener("click", () => {
                     const id = el.dataset.id;
@@ -1021,12 +1011,10 @@ Ensure high accuracy. Let's think step-by-step.`;
     function loadSavedConfig(item) {
         conceptInput.value = item.concept;
         
-        // Select Persona Radio
         personaRadios.forEach(radio => {
             radio.checked = radio.value === item.persona;
         });
 
-        // Set Depth Button state
         currentDepth = item.depth;
         depthBtns.forEach(btn => {
             if (btn.dataset.depth === item.depth) {
@@ -1036,12 +1024,10 @@ Ensure high accuracy. Let's think step-by-step.`;
             }
         });
 
-        // Select Format Radio
         formatRadios.forEach(radio => {
             radio.checked = radio.value === item.format;
         });
 
-        // Select Framework Tab
         currentFramework = item.framework;
         frameworkTabs.forEach(tab => {
             if (tab.dataset.framework === item.framework) {
@@ -1051,17 +1037,14 @@ Ensure high accuracy. Let's think step-by-step.`;
             }
         });
 
-        // Checkbox states
         addAnalogy.checked = !!item.addons.analogy;
         addMisconception.checked = !!item.addons.misconception;
         addExamples.checked = !!item.addons.examples;
         addQuiz.checked = !!item.addons.quiz;
 
-        // Reset manual edits
         exitManualEditMode();
         updateClearBtnVisibility();
         
-        // Output prompt
         promptOutput.value = item.prompt;
         updateStats();
         
@@ -1085,7 +1068,6 @@ Ensure high accuracy. Let's think step-by-step.`;
         }
     });
 
-    // Helper LocalStorage utilities
     function getLocalStorageData(key) {
         const data = localStorage.getItem(key);
         return data ? JSON.parse(data) : [];
@@ -1108,10 +1090,9 @@ Ensure high accuracy. Let's think step-by-step.`;
     }
 
     // -------------------------------------------------------------
-    // 10. General Event Bindings
+    // 11. General Event Bindings
     // -------------------------------------------------------------
     function setupEventListeners() {
-        // Toggle Sidebar visibility
         toggleSidebarBtn.addEventListener("click", () => {
             sidebar.classList.toggle("collapsed");
         });
@@ -1145,7 +1126,6 @@ Ensure high accuracy. Let's think step-by-step.`;
             });
         });
 
-        // Framework tab selection clicks
         frameworkTabs.forEach(tab => {
             tab.addEventListener("click", (e) => {
                 frameworkTabs.forEach(t => t.classList.remove("active"));
@@ -1165,7 +1145,6 @@ Ensure high accuracy. Let's think step-by-step.`;
         resetBtn.addEventListener("click", resetForm);
     }
 
-    // Copy prompt text to clipboard
     function copyPrompt() {
         const textToCopy = promptOutput.value;
         if (!conceptInput.value.trim() && !textToCopy) return;
@@ -1174,11 +1153,10 @@ Ensure high accuracy. Let's think step-by-step.`;
             showToast("Copied prompt to clipboard!");
         }).catch(err => {
             console.error("Failed to copy text: ", err);
-            promptOutput.select(); // fallback
+            promptOutput.select();
         });
     }
 
-    // Toast messenger utility
     function showToast(message) {
         toast.textContent = message;
         toast.classList.add("show");
@@ -1187,7 +1165,6 @@ Ensure high accuracy. Let's think step-by-step.`;
         }, 2200);
     }
 
-    // Toggle clear input button visibility
     function updateClearBtnVisibility() {
         if (conceptInput.value.length > 0) {
             clearInputBtn.style.display = "block";
@@ -1196,11 +1173,10 @@ Ensure high accuracy. Let's think step-by-step.`;
         }
     }
 
-    // Reset Form
     function resetForm() {
         conceptInput.value = "";
         personaRadios.forEach((radio, idx) => {
-            radio.checked = idx === 0; // Rigorous Expert
+            radio.checked = idx === 0;
         });
         currentDepth = "overview";
         depthBtns.forEach((btn, idx) => {
@@ -1208,7 +1184,7 @@ Ensure high accuracy. Let's think step-by-step.`;
             else btn.classList.remove("active");
         });
         formatRadios.forEach((radio, idx) => {
-            radio.checked = idx === 0; // Markdown
+            radio.checked = idx === 0;
         });
         
         currentFramework = "rtfc";
@@ -1229,7 +1205,7 @@ Ensure high accuracy. Let's think step-by-step.`;
         switchTab("prompt-tab");
     }
 
-    // Neural Network Background Canvas Animation
+    // Neural Network Background Canvas Animation (with Spinning Tech Radar)
     function initBgAnimation() {
         const canvas = document.getElementById("bg-canvas");
         if (!canvas) return;
@@ -1238,12 +1214,13 @@ Ensure high accuracy. Let's think step-by-step.`;
         let particles = [];
         let maxParticles = 55;
         const connectionDist = 120;
+        let radarSweepAngle = 0;
         
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             if (window.innerWidth < 768) {
-                maxParticles = 25;
+                maxParticles = 20;
             } else {
                 maxParticles = 55;
             }
@@ -1255,9 +1232,9 @@ Ensure high accuracy. Let's think step-by-step.`;
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.vx = (Math.random() - 0.5) * 0.35;
-                this.vy = (Math.random() - 0.5) * 0.35;
-                this.radius = Math.random() * 1.5 + 1.2;
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
+                this.radius = Math.random() * 1.5 + 1;
             }
             update() {
                 this.x += this.vx;
@@ -1269,7 +1246,7 @@ Ensure high accuracy. Let's think step-by-step.`;
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = "rgba(6, 182, 212, 0.4)";
+                ctx.fillStyle = "rgba(6, 182, 212, 0.3)";
                 ctx.fill();
             }
         }
@@ -1293,6 +1270,55 @@ Ensure high accuracy. Let's think step-by-step.`;
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
+            // 1. Draw Spinning HUD Radar scanner in bottom-right corner
+            const radarX = canvas.width - 160;
+            const radarY = canvas.height - 160;
+            const radarRadius = 100;
+            
+            if (canvas.width > 768) {
+                ctx.strokeStyle = "rgba(6, 182, 212, 0.08)";
+                ctx.lineWidth = 1;
+                
+                // Draw Concentric Radar Rings
+                for (let r = 25; r <= radarRadius; r += 25) {
+                    ctx.beginPath();
+                    ctx.arc(radarX, radarY, r, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                
+                // Draw Radar Grid lines (Crosshairs)
+                ctx.beginPath();
+                ctx.moveTo(radarX - radarRadius - 10, radarY);
+                ctx.lineTo(radarX + radarRadius + 10, radarY);
+                ctx.moveTo(radarX, radarY - radarRadius - 10);
+                ctx.lineTo(radarX, radarY + radarRadius + 10);
+                ctx.stroke();
+                
+                // Draw Sweep Line with Gradient Fade
+                radarSweepAngle += 0.004; // rotate speed
+                ctx.beginPath();
+                ctx.moveTo(radarX, radarY);
+                ctx.lineTo(
+                    radarX + Math.cos(radarSweepAngle) * radarRadius,
+                    radarY + Math.sin(radarSweepAngle) * radarRadius
+                );
+                ctx.strokeStyle = "rgba(6, 182, 212, 0.3)";
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                
+                // Draw rotating scan sweep cone highlight
+                ctx.beginPath();
+                ctx.moveTo(radarX, radarY);
+                ctx.arc(
+                    radarX, radarY, radarRadius, 
+                    radarSweepAngle - 0.2, radarSweepAngle, false
+                );
+                ctx.closePath();
+                ctx.fillStyle = "rgba(6, 182, 212, 0.02)";
+                ctx.fill();
+            }
+            
+            // 2. Draw Connecting Node Particles Network
             for (let i = 0; i < particles.length; i++) {
                 const p = particles[i];
                 p.update();
@@ -1305,12 +1331,12 @@ Ensure high accuracy. Let's think step-by-step.`;
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     
                     if (dist < connectionDist) {
-                        const alpha = (1 - dist / connectionDist) * 0.16;
+                        const alpha = (1 - dist / connectionDist) * 0.14;
                         ctx.beginPath();
                         ctx.moveTo(p.x, p.y);
                         ctx.lineTo(p2.x, p2.y);
-                        ctx.strokeStyle = `rgba(147, 51, 234, ${alpha})`;
-                        ctx.lineWidth = 0.85;
+                        ctx.strokeStyle = `rgba(168, 85, 247, ${alpha})`;
+                        ctx.lineWidth = 0.8;
                         ctx.stroke();
                     }
                 }
