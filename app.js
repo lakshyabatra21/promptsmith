@@ -1205,70 +1205,36 @@ Ensure high accuracy. Let's think step-by-step.`;
         switchTab("prompt-tab");
     }
 
-    // Neural Network Background Canvas Animation (with Spinning Tech Radar)
+    // Holographic Matrix Binary Rain & Tech Radar Canvas Animation
     function initBgAnimation() {
         const canvas = document.getElementById("bg-canvas");
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
         
-        let particles = [];
-        let maxParticles = 55;
-        const connectionDist = 120;
+        let columns;
+        let drops = [];
+        const fontSize = 14;
+        const binaryChars = "01".split("");
         let radarSweepAngle = 0;
         
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            if (window.innerWidth < 768) {
-                maxParticles = 20;
-            } else {
-                maxParticles = 55;
+            columns = Math.floor(canvas.width / fontSize);
+            drops = [];
+            // Randomize starting Y coordinates for each column drop
+            for (let x = 0; x < columns; x++) {
+                drops[x] = Math.random() * -100;
             }
         }
         window.addEventListener("resize", resize);
         resize();
         
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.vx = (Math.random() - 0.5) * 0.3;
-                this.vy = (Math.random() - 0.5) * 0.3;
-                this.radius = Math.random() * 1.5 + 1;
-            }
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                
-                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
-                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = "rgba(6, 182, 212, 0.3)";
-                ctx.fill();
-            }
-        }
-        
-        function populateParticles() {
-            particles = [];
-            for (let i = 0; i < maxParticles; i++) {
-                particles.push(new Particle());
-            }
-        }
-        populateParticles();
-        
-        let resizeTimeout;
-        window.addEventListener("resize", () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                populateParticles();
-            }, 300);
-        });
-        
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Matrix Rain & Radar draw function (runs ~30fps for CPU efficiency)
+        function draw() {
+            // Faint black background overlay to create character trails
+            ctx.fillStyle = "rgba(2, 4, 11, 0.085)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             // 1. Draw Spinning HUD Radar scanner in bottom-right corner
             const radarX = canvas.width - 160;
@@ -1276,7 +1242,7 @@ Ensure high accuracy. Let's think step-by-step.`;
             const radarRadius = 100;
             
             if (canvas.width > 768) {
-                ctx.strokeStyle = "rgba(6, 182, 212, 0.08)";
+                ctx.strokeStyle = "rgba(6, 182, 212, 0.05)";
                 ctx.lineWidth = 1;
                 
                 // Draw Concentric Radar Rings
@@ -1294,15 +1260,15 @@ Ensure high accuracy. Let's think step-by-step.`;
                 ctx.lineTo(radarX, radarY + radarRadius + 10);
                 ctx.stroke();
                 
-                // Draw Sweep Line with Gradient Fade
-                radarSweepAngle += 0.004; // rotate speed
+                // Draw Sweep Line
+                radarSweepAngle += 0.035; // speed of sweep rotation
                 ctx.beginPath();
                 ctx.moveTo(radarX, radarY);
                 ctx.lineTo(
                     radarX + Math.cos(radarSweepAngle) * radarRadius,
                     radarY + Math.sin(radarSweepAngle) * radarRadius
                 );
-                ctx.strokeStyle = "rgba(6, 182, 212, 0.3)";
+                ctx.strokeStyle = "rgba(6, 182, 212, 0.25)";
                 ctx.lineWidth = 1.5;
                 ctx.stroke();
                 
@@ -1311,39 +1277,44 @@ Ensure high accuracy. Let's think step-by-step.`;
                 ctx.moveTo(radarX, radarY);
                 ctx.arc(
                     radarX, radarY, radarRadius, 
-                    radarSweepAngle - 0.2, radarSweepAngle, false
+                    radarSweepAngle - 0.25, radarSweepAngle, false
                 );
                 ctx.closePath();
-                ctx.fillStyle = "rgba(6, 182, 212, 0.02)";
+                ctx.fillStyle = "rgba(6, 182, 212, 0.015)";
                 ctx.fill();
             }
             
-            // 2. Draw Connecting Node Particles Network
-            for (let i = 0; i < particles.length; i++) {
-                const p = particles[i];
-                p.update();
-                p.draw();
+            // 2. Draw Falling Matrix Binary Rain
+            for (let i = 0; i < drops.length; i++) {
+                // Select binary character randomly
+                const char = binaryChars[Math.floor(Math.random() * binaryChars.length)];
                 
-                for (let j = i + 1; j < particles.length; j++) {
-                    const p2 = particles[j];
-                    const dx = p.x - p2.x;
-                    const dy = p.y - p2.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
+                const x = i * fontSize;
+                const y = drops[i] * fontSize;
+                
+                if (y > 0) {
+                    // Calculate color shift based on screen height (fading purple to cyan)
+                    const heightRatio = y / canvas.height;
+                    const r = Math.floor(168 - heightRatio * 162); // 168 (purple) to 6 (cyan)
+                    const g = Math.floor(85 + heightRatio * 97);   // 85 to 182
+                    const b = Math.floor(247 - heightRatio * 35);  // 247 to 212
                     
-                    if (dist < connectionDist) {
-                        const alpha = (1 - dist / connectionDist) * 0.14;
-                        ctx.beginPath();
-                        ctx.moveTo(p.x, p.y);
-                        ctx.lineTo(p2.x, p2.y);
-                        ctx.strokeStyle = `rgba(168, 85, 247, ${alpha})`;
-                        ctx.lineWidth = 0.8;
-                        ctx.stroke();
-                    }
+                    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${Math.random() * 0.16 + 0.06})`; // Faint glowing stream
+                    ctx.font = fontSize + "px 'Share Tech Mono', monospace";
+                    ctx.fillText(char, x, y);
+                }
+                
+                // Reset drop to top once it goes past screen base
+                if (y > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                } else {
+                    drops[i]++;
                 }
             }
-            requestAnimationFrame(animate);
         }
-        animate();
+        
+        // Loop at ~30 FPS
+        setInterval(draw, 33);
     }
 
     // Run app initializers
