@@ -1,4 +1,4 @@
-// Promptsmith - Smart Intent-Aware ChatGPT Master Prompt Generator
+// Promptsmith - Smart Intent-Aware ChatGPT & Image Prompt Generator Engine
 
 document.addEventListener("DOMContentLoaded", () => {
     // UI Elements
@@ -44,8 +44,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const LOCAL_SAVED_KEY = "promptsmith_saved_prompts";
     const LOCAL_HISTORY_KEY = "promptsmith_history_prompts";
 
-    // Sample Ideas
+    // Realistic Sample Ideas
     const sampleIdeas = [
+        {
+            title: "Cinematic Portrait Photo",
+            category: "Photo & Image AI",
+            domain: "photo",
+            idea: "A cinematic portrait of a cybernetic engineer in a futuristic neon lab, shot on 85mm lens, golden hour lighting, 8k hyperrealistic."
+        },
+        {
+            title: "Product Background Editing",
+            category: "Photo & Image AI",
+            domain: "photo",
+            idea: "Edit an existing product photo to place a luxury perfume bottle on a sleek black marble surface surrounded by soft water ripples."
+        },
         {
             title: "Cold Job Outreach Email",
             category: "Job & Email",
@@ -57,18 +69,6 @@ document.addEventListener("DOMContentLoaded", () => {
             category: "Coding & Tech",
             domain: "coding",
             idea: "Create a modular Python script using BeautifulSoup to scrape product prices from an e-commerce site and save to CSV."
-        },
-        {
-            title: "Explain Neural Networks Simply",
-            category: "Study & Explain",
-            domain: "learning",
-            idea: "Explain how Artificial Neural Networks learn using a relatable factory assembly line analogy."
-        },
-        {
-            title: "7-Day SQL Query Study Plan",
-            category: "Study & Explain",
-            domain: "learning",
-            idea: "Create a 7-day intensive study roadmap for mastering SQL database queries, joins, and performance indexing."
         }
     ];
 
@@ -85,22 +85,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // -------------------------------------------------------------
-    // 2. Web Speech API (Voice Dictation Module)
+    // 2. Robust Web Speech API (Voice Dictation Module)
     // -------------------------------------------------------------
     function setupVoiceDictation() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
-            recognition.continuous = true;
+            recognition.continuous = false;
             recognition.interimResults = true;
             recognition.lang = "en-US";
 
+            let initialText = "";
+
             recognition.onstart = () => {
                 isListening = true;
+                initialText = conceptInput.value;
                 micBtn.classList.add("active");
                 listeningIndicator.style.display = "flex";
-                showToast("Voice typing started. Speak your request!");
+                showToast("🎙️ Listening... Speak your request!");
             };
 
             recognition.onresult = (event) => {
@@ -109,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     currentTranscript += event.results[i][0].transcript;
                 }
                 if (currentTranscript.trim()) {
-                    conceptInput.value = currentTranscript;
+                    conceptInput.value = (initialText ? initialText.trim() + " " : "") + currentTranscript.trim();
                     updateClearBtnVisibility();
                     generateMasterPrompt();
                 }
@@ -118,7 +121,14 @@ document.addEventListener("DOMContentLoaded", () => {
             recognition.onerror = (event) => {
                 console.error("Speech recognition error:", event.error);
                 stopListening();
-                showToast("Microphone access error. Please try typing.");
+
+                if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+                    alert("Microphone Permission Blocked!\n\nTo enable voice typing:\n1. Click the Lock icon 🔒 in your browser address bar.\n2. Turn ON 'Microphone' permission.\n3. Refresh the page and try again!");
+                } else if (event.error === "no-speech") {
+                    showToast("No speech detected. Click mic to try again!");
+                } else {
+                    showToast("Voice typing error: " + event.error);
+                }
             };
 
             recognition.onend = () => {
@@ -127,7 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             micBtn.addEventListener("click", () => {
                 if (isListening) {
-                    recognition.stop();
+                    try { recognition.stop(); } catch (e) {}
                     stopListening();
                 } else {
                     try {
@@ -139,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         } else {
             micBtn.addEventListener("click", () => {
-                showToast("Speech recognition not supported in this browser. Try Chrome or Edge!");
+                alert("Speech recognition is not supported in this browser. Please open the website in Google Chrome or Microsoft Edge!");
             });
         }
     }
@@ -185,17 +195,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // -------------------------------------------------------------
-    // 4. Smart Intent Analysis Engine
+    // 4. Smart Intent & Photo/Image Generation Logic
     // -------------------------------------------------------------
     function detectIntent(userSentence) {
         const text = userSentence.toLowerCase();
 
+        // Photo / Image Editing / Midjourney / DALL-E
+        if (text.match(/photo|image|picture|edit|photograph|portrait|camera|lighting|midjourney|dall-e|photoshop|background|background removal|render|8k|lens|aspect ratio/)) {
+            return "photo";
+        }
+        // Coding / Tech
         if (text.match(/code|python|javascript|react|html|css|sql|script|build|develop|bug|api|database|algorithm|function|scrape|web|app|debug|fix|program/)) {
             return "coding";
         }
+        // Job / Career / Email
         if (text.match(/email|job|resume|cover letter|recruiter|interview|business|sales|pitch|marketing|client|strategy|manager|career|post|linkedin/)) {
             return "business";
         }
+        // Study / Concept
         if (text.match(/explain|teach|understand|analogy|concept|math|physics|science|history|learn|study|roadmap|summary|difference|how does|why/)) {
             return "learning";
         }
@@ -219,7 +236,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let promptText = "";
 
-        if (activeIntent === "coding") {
+        // Photography / Image AI Prompt Generation
+        if (activeIntent === "photo") {
+            promptText = `[AI IMAGE & PHOTOGRAPHY GENERATION / EDITING PROMPT]
+
+SUBJECT & CONCEPT REQUEST:
+"${userIdea}"
+
+OPTIMIZED MIDJOURNEY / DALL-E 3 / STABLE DIFFUSION PROMPT:
+/imagine prompt: ${userIdea}, shot on 85mm f/1.4 lens, professional studio lighting, hyperrealistic, 8k resolution, ultra-detailed textures, volumetric atmospheric depth, photorealistic render, color graded --ar 16:9 --style raw --v 6.0
+
+ChatGPT PHOTO EDITING INSTRUCTIONS (For ChatGPT Vision / Photoshop AI):
+1. IMAGE COMPOSITION: Analyze the provided image and apply the edit specified: "${userIdea}".
+2. LIGHTING & COLOR: Match key light directions, ambient fill shadows, and color temperature.
+3. SUBJECT ISOLATION: Retain original subject sharpness while modifying background elements seamlessly.
+4. FINAL OUTPUT: Provide step-by-step editing parameters (exposure, contrast, highlights, shadows, color balance) to achieve this look.`;
+        }
+        // Coding & Technical
+        else if (activeIntent === "coding") {
             promptText = `[SYSTEM ROLE: SENIOR SOFTWARE ARCHITECT & ENGINEER]
 
 PROJECT OBJECTIVE:
@@ -233,6 +267,7 @@ TECHNICAL REQUIREMENTS & CODE SPECIFICATION:
 ${addExamples.checked ? "4. DEMO CODE: Provide a complete, runnable code sample that can be tested immediately.\n" : ""}${addNoFluff.checked ? "5. CONCISENESS: Skip conversational greetings. Start directly with the code solution.\n" : ""}
 Let's build this step-by-step using clean code standards.`;
         } 
+        // Business & Emails
         else if (activeIntent === "business") {
             promptText = `[EXPERT ROLE: EXECUTIVE COMMUNICATIONS & STRATEGY CONSULTANT]
 
@@ -248,6 +283,7 @@ STRATEGIC BLUEPRINT & STRUCTURE:
 ${addFormatting.checked ? "5. LAYOUT: Format with clean headers, bold key phrases, and bullet points.\n" : ""}
 Let's draft this professional response step-by-step.`;
         }
+        // Study & Learning
         else if (activeIntent === "learning") {
             promptText = `[PEDAGOGICAL ROLE: FIRST-PRINCIPLES EDUCATOR & CONCEPT ANALYST]
 
@@ -263,6 +299,7 @@ MASTERCLASS STRUCTURE:
 ${addStepByStep.checked ? "5. CHECKPOINT: End with a 2-question self-check quiz to test comprehension.\n" : ""}
 Let's break down this concept step-by-step.`;
         }
+        // General / Creative
         else {
             promptText = `[MASTER ROLE: SENIOR SUBJECT MATTER EXPERT & STRATEGIST]
 
@@ -562,7 +599,6 @@ ${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and s
         }
         window.addEventListener("resize", resize);
 
-        // Track mouse proximity for synapse interaction
         window.addEventListener("mousemove", (e) => {
             mouseX = e.clientX;
             mouseY = e.clientY;
@@ -632,19 +668,16 @@ ${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and s
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 1. Draw Floating AI Tech Glyphs
             for (let i = 0; i < floatingGlyphs.length; i++) {
                 floatingGlyphs[i].update();
                 floatingGlyphs[i].draw();
             }
 
-            // 2. Draw Neural Connections & Signals
             for (let i = 0; i < nodes.length; i++) {
                 const n1 = nodes[i];
                 n1.update();
                 n1.draw();
 
-                // Mouse interaction synapse
                 const mouseDx = n1.x - mouseX;
                 const mouseDy = n1.y - mouseY;
                 const mouseDist = Math.sqrt(mouseDx * mouseDx + mouseDy * mouseDy);
@@ -673,7 +706,6 @@ ${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and s
                         ctx.lineWidth = 0.8;
                         ctx.stroke();
 
-                        // Random signal pulse traveling on laser line
                         if (Math.random() < 0.003) {
                             pulses.push({
                                 x: n1.x, y: n1.y,
@@ -685,7 +717,6 @@ ${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and s
                 }
             }
 
-            // 3. Draw Traveling Signal Pulses
             for (let i = pulses.length - 1; i >= 0; i--) {
                 const p = pulses[i];
                 p.progress += 0.04;
@@ -698,7 +729,7 @@ ${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and s
                 ctx.shadowColor = "#38bdf8";
                 ctx.shadowBlur = 8;
                 ctx.fill();
-                ctx.shadowBlur = 0; // reset blur
+                ctx.shadowBlur = 0;
 
                 if (p.progress >= 1) {
                     pulses.splice(i, 1);
