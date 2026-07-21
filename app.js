@@ -1,11 +1,10 @@
-// Promptsmith - Freeform Idea to ChatGPT Master Prompt Generator Engine
+// Promptsmith - Accurate ChatGPT Prompt Generator Engine
 
 document.addEventListener("DOMContentLoaded", () => {
     // UI Elements
-    const conceptInput = document.getElementById("concept-input"); // Freeform Idea Textarea
+    const conceptInput = document.getElementById("concept-input");
     const clearInputBtn = document.getElementById("clear-input-btn");
     const domainRadios = document.querySelectorAll('input[name="domain"]');
-    const toneBtns = document.querySelectorAll('.depth-btn[data-tone]');
     
     // Enhancers checkboxes
     const addStepByStep = document.getElementById("add-step-by-step");
@@ -21,21 +20,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const toast = document.getElementById("toast");
     const presetsGrid = document.getElementById("presets-grid");
 
-    // Collapsible Sidebar
+    // Sidebar
     const sidebar = document.getElementById("sidebar");
     const toggleSidebarBtn = document.getElementById("toggle-sidebar-btn");
-    const editToggle = document.getElementById("edit-toggle");
-    const editWarning = document.getElementById("edit-warning");
-    const manualEditWrapper = document.getElementById("manual-edit-wrapper");
     
     // Stats elements
     const statTokens = document.getElementById("stat-tokens");
     const statWords = document.getElementById("stat-words");
-    const statQuality = document.getElementById("stat-quality");
-    
-    // Header telemetry elements
-    const tickerLoad = document.getElementById("ticker-load");
-    const tickerAlign = document.getElementById("ticker-align");
     
     // Sidebar list elements
     const savedList = document.getElementById("saved-list");
@@ -43,44 +34,35 @@ document.addEventListener("DOMContentLoaded", () => {
     const savedCount = document.getElementById("saved-count");
     const clearHistoryBtn = document.getElementById("clear-history-btn");
 
-    // App State
-    let currentTone = "expert"; // Default tone
-    let currentDomain = "general"; // Default domain
-    let manualEditMode = false;
-
     // LocalStorage keys
     const LOCAL_SAVED_KEY = "promptsmith_saved_prompts";
     const LOCAL_HISTORY_KEY = "promptsmith_history_prompts";
 
-    // Sample Example Ideas for quick testing
+    // Realistic Sample Ideas for Users
     const sampleIdeas = [
         {
-            title: "Cold Email to Recruiter",
-            category: "Job & Business",
+            title: "Cold Job Outreach Email",
+            category: "Job & Email",
             domain: "business",
-            tone: "expert",
-            idea: "Write a high-converting, professional cold email to a tech recruiter expressing interest in a Full-Stack Software Engineering role."
+            idea: "Write a high-converting, professional cold email to a tech recruiter expressing interest in a Software Engineer role."
         },
         {
-            title: "Python Web Scraper",
+            title: "Python Web Scraper Script",
             category: "Coding & Tech",
             domain: "coding",
-            tone: "expert",
-            idea: "Create a modular Python script using BeautifulSoup to scrape product prices from an e-commerce website and export the clean data to CSV."
+            idea: "Create a modular Python script using BeautifulSoup to scrape product prices from an e-commerce site and save to CSV."
         },
         {
-            title: "Explain Neural Networks",
-            category: "Study & Concept",
+            title: "Explain Neural Networks Simply",
+            category: "Study & Explain",
             domain: "learning",
-            tone: "simple",
-            idea: "Explain how Artificial Neural Networks learn and adjust weights using a relatable factory assembly line analogy."
+            idea: "Explain how Artificial Neural Networks learn using a relatable factory assembly line analogy."
         },
         {
-            title: "7-Day SQL Study Roadmap",
-            category: "Study & Exam Prep",
+            title: "7-Day SQL Query Study Plan",
+            category: "Study & Explain",
             domain: "learning",
-            tone: "expert",
-            idea: "Create an intensive 7-day study roadmap for mastering SQL database queries, joins, and performance indexing from scratch."
+            idea: "Create a 7-day intensive study roadmap for mastering SQL database queries, joins, and performance indexing."
         }
     ];
 
@@ -93,17 +75,16 @@ document.addEventListener("DOMContentLoaded", () => {
         setupEventListeners();
         resetForm();
         initBgAnimation();
-        setupDiagnosticsLoop();
     }
 
     // -------------------------------------------------------------
-    // 2. Render Quick Sample Ideas
+    // 2. Render Sample Ideas
     // -------------------------------------------------------------
     function renderSampleIdeas() {
         presetsGrid.innerHTML = "";
         presetsGrid.innerHTML = sampleIdeas.map((item, idx) => `
             <button class="preset-card" data-index="${idx}">
-                <div style="font-size: 0.725rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--secondary); font-weight:600; margin-bottom:0.25rem;">${item.category}</div>
+                <div style="font-size: 0.725rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); font-weight:700; margin-bottom:0.25rem;">${item.category}</div>
                 <h4>${item.title}</h4>
                 <p>"${item.idea}"</p>
             </button>
@@ -124,29 +105,16 @@ document.addEventListener("DOMContentLoaded", () => {
         domainRadios.forEach(radio => {
             radio.checked = radio.value === item.domain;
         });
-        currentDomain = item.domain;
 
-        currentTone = item.tone;
-        toneBtns.forEach(btn => {
-            if (btn.dataset.tone === item.tone) {
-                btn.classList.add("active");
-            } else {
-                btn.classList.remove("active");
-            }
-        });
-
-        exitManualEditMode();
         updateClearBtnVisibility();
         generateMasterPrompt();
-        showToast("Example idea loaded!");
+        showToast("Sample prompt loaded!");
     }
 
     // -------------------------------------------------------------
-    // 3. Freeform Sentence-to-Prompt Engine
+    // 3. Sentence-to-Master Prompt Transformer Logic
     // -------------------------------------------------------------
     function generateMasterPrompt() {
-        if (manualEditMode) return;
-
         const userIdea = conceptInput.value.trim();
         if (!userIdea) {
             promptOutput.value = "";
@@ -159,53 +127,38 @@ document.addEventListener("DOMContentLoaded", () => {
         saveLibraryBtn.disabled = false;
 
         const selectedDomain = document.querySelector('input[name="domain"]:checked').value;
-        currentDomain = selectedDomain;
-
         const roleConfig = getRoleConfig(selectedDomain);
-        const toneConfig = getToneConfig(currentTone);
 
-        let instructionsList = [];
-        if (addStepByStep.checked) instructionsList.push("- Break down your reasoning step-by-step using first-principles logic before providing the final answer.");
-        if (addExamples.checked) instructionsList.push("- Include concrete, practical real-world examples (and well-commented code snippets if relevant).");
-        if (addNoFluff.checked) instructionsList.push("- Omit introductory pleasantries, filler phrases, or conversational preamble. Begin directly with the core solution.");
-        if (addFormatting.checked) instructionsList.push("- Format the response cleanly in Markdown using structural headers (H2, H3), bolding for vital terminology, bullet points, and syntax-highlighted code blocks.");
+        let rules = [];
+        if (addStepByStep.checked) rules.push("- Break down your reasoning step-by-step before providing the final answer.");
+        if (addExamples.checked) rules.push("- Include concrete, practical real-world examples (and code blocks if applicable).");
+        if (addNoFluff.checked) rules.push("- Omit introductory pleasantries or fluff comments. Begin directly with the solution.");
+        if (addFormatting.checked) rules.push("- Structure the output cleanly in Markdown using headers (H2, H3), bold key terms, and bulleted lists.");
 
         const promptText = `[ROLE & EXPERT PERSONA]
 ${roleConfig}
 
-[PRIMARY OBJECTIVE]
-Your goal is to address the following user request in full detail:
+[PRIMARY GOAL]
+Directly address and fulfill the following user request:
 "${userIdea}"
 
-[TONE & INSTRUCTION STYLE]
-${toneConfig}
+[CONSTRAINTS & QUALITY RULES]
+${rules.length > 0 ? rules.join("\n") : "- Provide an accurate and comprehensive response."}
+- Explicitly identify any edge-cases, assumptions, or limitations.
 
-[EXECUTION CONSTRAINTS & REQUIREMENTS]
-${instructionsList.length > 0 ? instructionsList.join("\n") : "- Provide a clear, thorough, and highly accurate response."}
-- Explicitly state any underlying assumptions, prerequisites, or potential edge-cases.
-
-Let me know if you need any clarifying details before beginning. Let's think step-by-step.`;
+Let's think step-by-step to achieve the best result.`;
 
         promptOutput.value = promptText;
         updateStats();
-        addToHistoryDebounced(userIdea, currentDomain);
+        addToHistoryDebounced(userIdea, selectedDomain);
     }
 
     function getRoleConfig(domain) {
         switch (domain) {
-            case "coding": return "Act as an elite Senior Software Architect and Principal Engineer. Your code solutions should be robust, clean, modular, and adhere to industry best practices.";
-            case "business": return "Act as a top-tier Executive Consultant and Professional Communications Strategist. Your responses should be persuasive, polished, structured, and high-impact.";
-            case "learning": return "Act as a world-class Academic Instructor and First-Principles Educator. You excel at taking complex topics and breaking them down into digestible, intuitive mental models.";
-            default: return "Act as a knowledgeable, highly capable AI Assistant with deep expertise across technology, strategy, and analytical problem-solving.";
-        }
-    }
-
-    function getToneConfig(tone) {
-        switch (tone) {
-            case "expert": return "Maintain an authoritative, precise, and academically rigorous tone. Prioritize technical accuracy, depth, and structured logic.";
-            case "simple": return "Use clear, intuitive language. Avoid unnecessary jargon, use simple analogies, and explain terms clearly as if teaching a beginner.";
-            case "creative": return "Adopt an engaging, dynamic, and imaginative style. Use vivid metaphors and compelling framing to bring the response to life.";
-            default: return "Maintain a clear, professional, and helpful tone.";
+            case "coding": return "Act as a Senior Software Architect and Senior Engineer. Provide robust, clean, and highly optimized technical code solutions adhering to industry best practices.";
+            case "business": return "Act as an Executive Business Consultant and Professional Copywriter. Provide high-impact, persuasive, and structured responses.";
+            case "learning": return "Act as an Expert First-Principles Educator. Explain complex topics using clear intuition, analogies, and structured breakdowns.";
+            default: return "Act as an expert AI Assistant specializing in high-accuracy analysis, clear writing, and logical problem solving.";
         }
     }
 
@@ -220,54 +173,10 @@ Let me know if you need any clarifying details before beginning. Let's think ste
         
         statTokens.textContent = tokenEstimate;
         statWords.textContent = wordCount;
-        tickerAlign.textContent = `MODE: ${currentDomain.toUpperCase()} TRANSFORMER`;
     }
 
     // -------------------------------------------------------------
-    // 5. Diagnostics Telemetry & Mouse Spotlight
-    // -------------------------------------------------------------
-    function setupDiagnosticsLoop() {
-        setInterval(() => {
-            const mockLoad = Math.floor(Math.random() * 20) + 5;
-            tickerLoad.textContent = `LOAD: ${mockLoad}%`;
-        }, 3000);
-        
-        document.addEventListener("mousemove", (e) => {
-            document.body.style.setProperty("--mouse-x", `${e.clientX}px`);
-            document.body.style.setProperty("--mouse-y", `${e.clientY}px`);
-        });
-    }
-
-    // -------------------------------------------------------------
-    // 6. Manual Edit Mode
-    // -------------------------------------------------------------
-    editToggle.addEventListener("change", (e) => {
-        manualEditMode = e.target.checked;
-        if (manualEditMode) {
-            promptOutput.removeAttribute("readonly");
-            editWarning.style.display = "flex";
-            promptOutput.focus();
-        } else {
-            exitManualEditMode();
-            generateMasterPrompt();
-        }
-    });
-
-    function exitManualEditMode() {
-        manualEditMode = false;
-        editToggle.checked = false;
-        promptOutput.setAttribute("readonly", true);
-        editWarning.style.display = "none";
-    }
-
-    promptOutput.addEventListener("input", () => {
-        if (manualEditMode) {
-            updateStats();
-        }
-    });
-
-    // -------------------------------------------------------------
-    // 7. Persistence Operations (LocalStorage)
+    // 5. Persistence Operations (LocalStorage)
     // -------------------------------------------------------------
     saveLibraryBtn.addEventListener("click", () => {
         const idea = conceptInput.value.trim();
@@ -283,8 +192,6 @@ Let me know if you need any clarifying details before beginning. Let's think ste
             id: "saved_" + Date.now(),
             label: label,
             idea: idea,
-            domain: currentDomain,
-            tone: currentTone,
             prompt: text,
             date: new Date().toLocaleDateString()
         };
@@ -311,7 +218,6 @@ Let me know if you need any clarifying details before beginning. Let's think ste
             const historyItem = {
                 id: "hist_" + Date.now(),
                 idea: idea,
-                domain: domain,
                 prompt: promptOutput.value,
                 date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             };
@@ -332,7 +238,7 @@ Let me know if you need any clarifying details before beginning. Let's think ste
 
         savedList.innerHTML = "";
         if (saved.length === 0) {
-            savedList.innerHTML = `<div class="empty-state">No saved prompts yet. Generate a prompt and click "Save to Library" to store it.</div>`;
+            savedList.innerHTML = `<div class="empty-state">No saved prompts yet. Click "Save" to store a prompt.</div>`;
         } else {
             savedList.innerHTML = saved.map(item => `
                 <div class="sidebar-item" data-id="${item.id}">
@@ -343,7 +249,6 @@ Let me know if you need any clarifying details before beginning. Let's think ste
                         </button>
                     </div>
                     <div class="sidebar-item-meta">
-                        <span>${item.domain.toUpperCase()}</span>
                         <span>${item.date}</span>
                     </div>
                 </div>
@@ -365,7 +270,7 @@ Let me know if you need any clarifying details before beginning. Let's think ste
 
         historyList.innerHTML = "";
         if (history.length === 0) {
-            historyList.innerHTML = `<div class="empty-state">Your recent generated prompts will appear here.</div>`;
+            historyList.innerHTML = `<div class="empty-state">Your recent generations will appear here.</div>`;
         } else {
             historyList.innerHTML = history.map(item => `
                 <div class="sidebar-item" data-id="${item.id}">
@@ -373,7 +278,6 @@ Let me know if you need any clarifying details before beginning. Let's think ste
                         <div class="sidebar-item-title" style="font-weight: 500;">"${escapeHTML(item.idea.substring(0, 35))}..."</div>
                     </div>
                     <div class="sidebar-item-meta">
-                        <span style="color: var(--secondary); font-weight: 600;">${item.domain.toUpperCase()}</span>
                         <span>${item.date}</span>
                     </div>
                 </div>
@@ -391,23 +295,7 @@ Let me know if you need any clarifying details before beginning. Let's think ste
 
     function loadSavedConfig(item) {
         conceptInput.value = item.idea;
-        
-        domainRadios.forEach(radio => {
-            radio.checked = radio.value === item.domain;
-        });
-
-        currentTone = item.tone || "expert";
-        toneBtns.forEach(btn => {
-            if (btn.dataset.tone === currentTone) {
-                btn.classList.add("active");
-            } else {
-                btn.classList.remove("active");
-            }
-        });
-
-        exitManualEditMode();
         updateClearBtnVisibility();
-        
         promptOutput.value = item.prompt;
         updateStats();
         showToast("Saved prompt loaded!");
@@ -451,7 +339,7 @@ Let me know if you need any clarifying details before beginning. Let's think ste
     }
 
     // -------------------------------------------------------------
-    // 8. General Event Bindings
+    // 6. Event Bindings & Utilities
     // -------------------------------------------------------------
     function setupEventListeners() {
         toggleSidebarBtn.addEventListener("click", () => {
@@ -472,15 +360,6 @@ Let me know if you need any clarifying details before beginning. Let's think ste
 
         domainRadios.forEach(radio => {
             radio.addEventListener("change", generateMasterPrompt);
-        });
-
-        toneBtns.forEach(btn => {
-            btn.addEventListener("click", (e) => {
-                toneBtns.forEach(b => b.classList.remove("active"));
-                e.currentTarget.classList.add("active");
-                currentTone = e.currentTarget.dataset.tone;
-                generateMasterPrompt();
-            });
         });
 
         addStepByStep.addEventListener("change", generateMasterPrompt);
@@ -525,121 +404,67 @@ Let me know if you need any clarifying details before beginning. Let's think ste
         domainRadios.forEach((radio, idx) => {
             radio.checked = idx === 0;
         });
-        currentTone = "expert";
-        toneBtns.forEach((btn, idx) => {
-            if (idx === 0) btn.classList.add("active");
-            else btn.classList.remove("active");
-        });
 
         addStepByStep.checked = true;
         addExamples.checked = true;
         addNoFluff.checked = true;
         addFormatting.checked = true;
 
-        exitManualEditMode();
         updateClearBtnVisibility();
         generateMasterPrompt();
     }
 
-    // Holographic Matrix Binary Rain & Tech Radar Canvas Animation
+    // Clean Ambient Particle Motion Canvas Animation
     function initBgAnimation() {
         const canvas = document.getElementById("bg-canvas");
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
         
-        let columns;
-        let drops = [];
-        const fontSize = 14;
-        const binaryChars = "01".split("");
-        let radarSweepAngle = 0;
+        let particles = [];
+        const maxParticles = 30;
         
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            columns = Math.floor(canvas.width / fontSize);
-            drops = [];
-            for (let x = 0; x < columns; x++) {
-                drops[x] = Math.random() * -100;
-            }
         }
         window.addEventListener("resize", resize);
         resize();
         
-        function draw() {
-            ctx.fillStyle = "rgba(2, 4, 11, 0.085)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // 1. Draw Spinning HUD Radar scanner in bottom-right corner
-            const radarX = canvas.width - 160;
-            const radarY = canvas.height - 160;
-            const radarRadius = 100;
-            
-            if (canvas.width > 768) {
-                ctx.strokeStyle = "rgba(6, 182, 212, 0.05)";
-                ctx.lineWidth = 1;
-                
-                for (let r = 25; r <= radarRadius; r += 25) {
-                    ctx.beginPath();
-                    ctx.arc(radarX, radarY, r, 0, Math.PI * 2);
-                    ctx.stroke();
-                }
-                
-                ctx.beginPath();
-                ctx.moveTo(radarX - radarRadius - 10, radarY);
-                ctx.lineTo(radarX + radarRadius + 10, radarY);
-                ctx.moveTo(radarX, radarY - radarRadius - 10);
-                ctx.lineTo(radarX, radarY + radarRadius + 10);
-                ctx.stroke();
-                
-                radarSweepAngle += 0.035;
-                ctx.beginPath();
-                ctx.moveTo(radarX, radarY);
-                ctx.lineTo(
-                    radarX + Math.cos(radarSweepAngle) * radarRadius,
-                    radarY + Math.sin(radarSweepAngle) * radarRadius
-                );
-                ctx.strokeStyle = "rgba(6, 182, 212, 0.25)";
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-                
-                ctx.beginPath();
-                ctx.moveTo(radarX, radarY);
-                ctx.arc(
-                    radarX, radarY, radarRadius, 
-                    radarSweepAngle - 0.25, radarSweepAngle, false
-                );
-                ctx.closePath();
-                ctx.fillStyle = "rgba(6, 182, 212, 0.015)";
-                ctx.fill();
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.25;
+                this.vy = (Math.random() - 0.5) * 0.25;
+                this.radius = Math.random() * 1.5 + 1;
             }
-            
-            // 2. Draw Falling Matrix Binary Rain
-            for (let i = 0; i < drops.length; i++) {
-                const char = binaryChars[Math.floor(Math.random() * binaryChars.length)];
-                
-                const x = i * fontSize;
-                const y = drops[i] * fontSize;
-                
-                if (y > 0) {
-                    const heightRatio = y / canvas.height;
-                    const r = Math.floor(168 - heightRatio * 162);
-                    const g = Math.floor(85 + heightRatio * 97);
-                    const b = Math.floor(247 - heightRatio * 35);
-                    
-                    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${Math.random() * 0.16 + 0.06})`;
-                    ctx.font = fontSize + "px 'Share Tech Mono', monospace";
-                    ctx.fillText(char, x, y);
-                }
-                
-                if (y > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                } else {
-                    drops[i]++;
-                }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = "rgba(56, 189, 248, 0.25)";
+                ctx.fill();
             }
         }
         
-        setInterval(draw, 33);
+        for (let i = 0; i < maxParticles; i++) {
+            particles.push(new Particle());
+        }
+        
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
     }
 
     init();

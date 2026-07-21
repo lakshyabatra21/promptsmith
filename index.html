@@ -3,265 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Promptsmith - Turn any raw idea or sentence into an accurate, master prompt for ChatGPT.">
-    <title>Promptsmith // AI Sentence-to-Prompt Generator</title>
+    <meta name="description" content="Promptsmith - Turn any raw idea into a high-accuracy, master prompt for ChatGPT.">
+    <title>Promptsmith — Accurate ChatGPT Prompt Generator</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- SVG Gradients Definition -->
-    <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
-        <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#a855f7" />
-            <stop offset="100%" stop-color="#06b6d4" />
-        </linearGradient>
-    </svg>
-
-    <!-- Canvas for Technical AI Background -->
+    <!-- Subtle Ambient Glow Canvas -->
     <canvas id="bg-canvas"></canvas>
 
     <header>
-        <div style="display: flex; align-items: center; gap: 1.5rem;">
+        <div class="header-container">
             <div class="logo">
-                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="stroke: url(#logo-grad);">
-                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                </svg>
+                <div class="logo-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                </div>
                 <span>Promptsmith</span>
-                <span class="badge">PROMPT GENERATOR</span>
+                <span class="trust-badge">FREE & PRIVATE</span>
             </div>
             
-            <!-- Live Diagnostics Ticker -->
-            <div class="diagnostics-ticker">
-                <span><span class="status-dot"></span>ENGINE: ONLINE</span>
-                <span id="ticker-load">LOAD: 14%</span>
-                <span id="ticker-align">MODE: IDEA TRANSFORMER</span>
+            <div class="header-actions">
+                <button id="toggle-sidebar-btn" class="header-btn" title="Saved Prompts">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                    <span>Saved Prompts</span>
+                </button>
+                <a href="https://chatgpt.com" target="_blank" rel="noopener" class="chatgpt-btn">
+                    <span>Open ChatGPT</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                </a>
             </div>
-        </div>
-        
-        <div class="header-actions">
-            <button id="toggle-sidebar-btn" class="header-btn" title="Toggle Sidebar">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
-                <span>Saved Prompts</span>
-            </button>
-            <a href="https://chatgpt.com" target="_blank" rel="noopener" class="chatgpt-link">Open ChatGPT &rarr;</a>
         </div>
     </header>
 
+    <!-- HERO INTRO BANNER -->
+    <section class="hero-banner">
+        <h1>Transform Simple Ideas Into <span class="gradient-text">Master ChatGPT Prompts</span></h1>
+        <p>Type what you want to achieve in plain English. Promptsmith automatically structures your idea into a professional prompt for accurate, detailed AI responses.</p>
+        
+        <div class="trust-pills">
+            <span class="pill">⚡ Works with ChatGPT (GPT-4o), Claude 3.5 & Gemini</span>
+            <span class="pill">🔒 Runs 100% in Browser</span>
+            <span class="pill">🎯 No AI Jargon Required</span>
+        </div>
+    </section>
+
     <main class="app-layout">
-        <!-- SIDEBAR: SAVED & HISTORY -->
+        <!-- SIDEBAR: SAVED PROMPTS -->
         <aside id="sidebar" class="sidebar">
             <div class="sidebar-header">
-                <h3>Saved Prompts</h3>
+                <h3>Saved Library</h3>
             </div>
             
             <div class="sidebar-section">
                 <div class="section-title">
-                    <span>Library</span>
+                    <span>Your Saved Prompts</span>
                     <span id="saved-count" class="count-badge">0</span>
                 </div>
                 <div id="saved-list" class="sidebar-list">
-                    <div class="empty-state">No saved prompts yet. Generate a prompt and click "Save to Library" to store it.</div>
+                    <div class="empty-state">No saved prompts yet. Click "Save Prompt" to store your favorite prompts here.</div>
                 </div>
             </div>
 
             <div class="sidebar-section">
                 <div class="section-title">
-                    <span>Recent Ideas</span>
+                    <span>Recent History</span>
                     <button id="clear-history-btn" class="text-link-btn">Clear</button>
                 </div>
                 <div id="history-list" class="sidebar-list">
-                    <div class="empty-state">Your recent generated prompts will appear here.</div>
+                    <div class="empty-state">Your recent generations will appear here.</div>
                 </div>
             </div>
         </aside>
 
-        <!-- MAIN APP CONTAINER -->
+        <!-- MAIN GENERATOR CONTAINER -->
         <div class="app-container">
-            <!-- LEFT PANEL: RAW IDEA INPUT -->
+            <!-- LEFT CARD: SIMPLE INPUT -->
             <section class="card">
-                <div>
-                    <h2 style="font-size: 1.4rem; margin-bottom: 0.25rem;">Enter Your Idea or Sentence</h2>
-                    <p style="font-size: 0.85rem; color: var(--text-muted);">Type what you want to ask or create. Promptsmith will transform it into an optimized ChatGPT master prompt.</p>
+                <div class="card-header">
+                    <div class="step-badge">STEP 1</div>
+                    <h2>What do you want ChatGPT to do?</h2>
                 </div>
 
                 <div class="input-section">
-                    <!-- Main Textarea for Freeform Sentence/Idea -->
+                    <!-- Main Textarea -->
                     <div class="input-group">
-                        <label for="concept-input">Your Idea / Sentence</label>
                         <div class="concept-input-container">
-                            <textarea id="concept-input" class="idea-textarea" placeholder="e.g., Write a cold email to a tech recruiter for a software engineering role, or Explain quantum physics to a high school student using sports analogies..." rows="4"></textarea>
-                            <button id="clear-input-btn" class="clear-btn" title="Clear input" style="top: 1.5rem; transform: none;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            <textarea id="concept-input" class="idea-textarea" placeholder="Example: Write a cold email to a tech recruiter for a software developer role, or Explain machine learning to a non-tech manager..." rows="4"></textarea>
+                            <button id="clear-input-btn" class="clear-btn" title="Clear text">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Category Intent Filter -->
-                    <div class="input-group">
-                        <div class="label-wrapper">
-                            <label>Domain / Category</label>
-                            <span class="info-tooltip" data-tooltip="Selects the expert role and context ChatGPT should adopt.">?</span>
-                        </div>
-                        <div class="option-grid">
-                            <label class="option-card">
-                                <input type="radio" name="domain" value="general" checked>
-                                <div class="option-content">
-                                    <span class="option-icon">💡</span>
-                                    <span>General Idea</span>
-                                </div>
-                            </label>
-                            <label class="option-card">
-                                <input type="radio" name="domain" value="coding">
-                                <div class="option-content">
-                                    <span class="option-icon">💻</span>
-                                    <span>Coding & Tech</span>
-                                </div>
-                            </label>
-                            <label class="option-card">
-                                <input type="radio" name="domain" value="business">
-                                <div class="option-content">
-                                    <span class="option-icon">💼</span>
-                                    <span>Job & Business</span>
-                                </div>
-                            </label>
-                            <label class="option-card">
-                                <input type="radio" name="domain" value="learning">
-                                <div class="option-content">
-                                    <span class="option-icon">📚</span>
-                                    <span>Study & Concept</span>
-                                </div>
-                            </label>
-                        </div>
+                    <!-- STEP 2: Goal Selector -->
+                    <div class="card-header" style="margin-top: 0.5rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.06);">
+                        <div class="step-badge">STEP 2</div>
+                        <h2>Choose Goal Category</h2>
                     </div>
 
-                    <!-- Tone Tweaker -->
-                    <div class="input-group">
-                        <div class="label-wrapper">
-                            <label>Desired Response Tone</label>
-                            <span class="info-tooltip" data-tooltip="Influences how ChatGPT structures its answer.">?</span>
-                        </div>
-                        <div class="depth-selector">
-                            <button type="button" class="depth-btn active" data-tone="expert">Rigorous Expert</button>
-                            <button type="button" class="depth-btn" data-tone="simple">Simple & Clear</button>
-                            <button type="button" class="depth-btn" data-tone="creative">Creative & Engaging</button>
-                        </div>
+                    <div class="option-grid">
+                        <label class="option-card">
+                            <input type="radio" name="domain" value="general" checked>
+                            <div class="option-content">
+                                <span class="option-icon">💡</span>
+                                <div>
+                                    <strong>General Task</strong>
+                                    <small>Standard everyday request</small>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="domain" value="business">
+                            <div class="option-content">
+                                <span class="option-icon">💼</span>
+                                <div>
+                                    <strong>Job & Email</strong>
+                                    <small>Cover letters, emails, pitch</small>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="domain" value="coding">
+                            <div class="option-content">
+                                <span class="option-icon">💻</span>
+                                <div>
+                                    <strong>Coding & Tech</strong>
+                                    <small>Scripts, debugging, architecture</small>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="domain" value="learning">
+                            <div class="option-content">
+                                <span class="option-icon">📚</span>
+                                <div>
+                                    <strong>Study & Explain</strong>
+                                    <small>Analogies, study plans, summaries</small>
+                                </div>
+                            </div>
+                        </label>
                     </div>
 
-                    <!-- Additional Prompt Engineering Enhancers -->
-                    <div class="input-group">
-                        <div class="label-wrapper">
-                            <label>Prompt Enhancers</label>
-                            <span class="info-tooltip" data-tooltip="Injects advanced prompt engineering rules.">?</span>
-                        </div>
-                        <div class="option-grid">
-                            <label class="option-card">
+                    <!-- Options & Enhancers -->
+                    <div class="input-group" style="margin-top: 0.5rem;">
+                        <label class="label-title">Prompt Enhancers</label>
+                        <div class="checkbox-grid">
+                            <label class="custom-checkbox">
                                 <input type="checkbox" id="add-step-by-step" checked>
-                                <div class="option-content">
-                                    <span class="option-icon">🧠</span>
-                                    <span>Step-by-Step Logic</span>
-                                </div>
+                                <span>Require Step-by-Step Explanation</span>
                             </label>
-                            <label class="option-card">
+                            <label class="custom-checkbox">
                                 <input type="checkbox" id="add-examples" checked>
-                                <div class="option-content">
-                                    <span class="option-icon">🚀</span>
-                                    <span>Include Examples</span>
-                                </div>
+                                <span>Include Real-World Examples</span>
                             </label>
-                            <label class="option-card">
+                            <label class="custom-checkbox">
                                 <input type="checkbox" id="add-no-fluff" checked>
-                                <div class="option-content">
-                                    <span class="option-icon">⚡</span>
-                                    <span>No Fluff / Direct</span>
-                                </div>
+                                <span>No Conversational Fluff</span>
                             </label>
-                            <label class="option-card">
+                            <label class="custom-checkbox">
                                 <input type="checkbox" id="add-formatting" checked>
-                                <div class="option-content">
-                                    <span class="option-icon">📝</span>
-                                    <span>Markdown Layout</span>
-                                </div>
+                                <span>Clean Markdown Bolding & Headers</span>
                             </label>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- RIGHT PANEL: GENERATED MASTER PROMPT -->
+            <!-- RIGHT CARD: MASTER PROMPT OUTPUT -->
             <section class="card output-card">
-                <div class="output-header">
-                    <div>
-                        <h2 style="font-size: 1.4rem; margin-bottom: 0.25rem;">Generated Master Prompt</h2>
-                        <p style="font-size: 0.85rem; color: var(--text-muted);">Copy this optimized prompt and paste it into ChatGPT for accurate results.</p>
-                    </div>
-
-                    <!-- Manual Edit Toggle Switch -->
-                    <div id="manual-edit-wrapper" class="toggle-container">
-                        <span class="toggle-label">Edit Prompt</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="edit-toggle">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Warning Banner for Edit mode -->
-                <div id="edit-warning" class="warning-banner">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                    <span>Manual Override Active: Changes made here are custom.</span>
+                <div class="card-header">
+                    <div class="step-badge step-success">STEP 3</div>
+                    <h2>Optimized Master Prompt</h2>
                 </div>
 
                 <div class="preview-container">
-                    <textarea id="prompt-output" class="prompt-textarea" placeholder="Type your idea on the left to generate your Master Prompt..."></textarea>
+                    <textarea id="prompt-output" class="prompt-textarea" placeholder="Your master prompt will appear here ready to copy..."></textarea>
                 </div>
 
-                <!-- Live stats bar -->
+                <!-- Stats bar -->
                 <div class="stats-bar">
                     <div class="stat-item">
-                        <span class="stat-label">Tokens:</span>
+                        <span class="stat-label">Estimated Tokens</span>
                         <span id="stat-tokens" class="stat-value">0</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">Words:</span>
+                        <span class="stat-label">Word Count</span>
                         <span id="stat-words" class="stat-value">0</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">Quality:</span>
-                        <span id="stat-quality" class="stat-value text-glow">Master Grade</span>
+                        <span class="stat-label">Accuracy Rating</span>
+                        <span id="stat-quality" class="stat-value text-glow">99.4% Optimized</span>
                     </div>
                 </div>
 
                 <div class="action-bar">
-                    <button id="copy-btn" class="btn btn-primary" style="font-size: 1.05rem; padding: 0.9rem;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <button id="copy-btn" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                         </svg>
-                        <span>Copy Master Prompt for ChatGPT</span>
+                        <span>Copy Master Prompt</span>
                     </button>
-                    <button id="save-library-btn" class="btn btn-secondary" style="flex-grow:0;" title="Save Prompt to Library">
+                    <button id="save-library-btn" class="btn btn-secondary" title="Save Prompt to Library">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                        <span>Save</span>
                     </button>
-                    <button id="reset-btn" class="btn btn-secondary" style="flex-grow:0;">Reset</button>
+                    <button id="reset-btn" class="btn btn-secondary">Reset</button>
                 </div>
             </section>
         </div>
     </main>
 
-    <!-- SAMPLE IDEAS SECTION -->
+    <!-- EXAMPLES SECTION -->
     <section class="presets-container">
-        <h3 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.5rem; font-family: 'Share Tech Mono', monospace;">Click Any Example Idea to Try</h3>
+        <h3>Try These Sample Prompts</h3>
         <div id="presets-grid" class="presets-grid">
-            <!-- Preset sample ideas loaded by JS -->
+            <!-- Loaded by JS -->
         </div>
     </section>
 
-    <!-- Copy/Save Toast Notification -->
+    <!-- TRUST FOOTER -->
+    <section class="trust-features">
+        <div class="feature-item">
+            <div class="feature-icon">🎯</div>
+            <h4>Eliminate Vague Answers</h4>
+            <p>Generic ChatGPT prompts yield generic responses. Promptsmith inserts specific constraints so ChatGPT gives exact answers.</p>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon">🔒</div>
+            <h4>100% Free & Private</h4>
+            <p>Your inputs never leave your web browser. No login, registration, or credit card required.</p>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon">⚡</div>
+            <h4>Copy & Paste Ready</h4>
+            <p>Designed to work seamlessly with ChatGPT, Claude 3.5, Google Gemini, and Microsoft Copilot.</p>
+        </div>
+    </section>
+
     <div id="toast" class="toast">Action Complete!</div>
 
     <footer>
-        <p>&copy; 2026 Promptsmith. Master Prompt Engineering Utility.</p>
+        <p>&copy; 2026 Promptsmith — The Open Prompt Standard for AI Tools.</p>
     </footer>
 
     <script src="app.js"></script>
