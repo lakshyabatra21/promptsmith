@@ -167,9 +167,9 @@ document.addEventListener("DOMContentLoaded", () => {
         presetsGrid.innerHTML = "";
         presetsGrid.innerHTML = sampleIdeas.map((item, idx) => `
             <button class="preset-card" data-index="${idx}">
-                <div style="font-size: 0.725rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); font-weight:700; margin-bottom:0.25rem;">${item.category}</div>
-                <h4>${item.title}</h4>
-                <p>"${item.idea}"</p>
+                <div style="font-size: 0.725rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); font-weight:700; margin-bottom:0.25rem;">${escapeHTML(item.category)}</div>
+                <h4>${escapeHTML(item.title)}</h4>
+                <p>"${escapeHTML(item.idea)}"</p>
             </button>
         `).join("");
 
