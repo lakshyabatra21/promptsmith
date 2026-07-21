@@ -1,9 +1,11 @@
-// Promptsmith - Accurate ChatGPT Prompt Generator Engine
+// Promptsmith - Smart Intent-Aware ChatGPT Master Prompt Generator
 
 document.addEventListener("DOMContentLoaded", () => {
     // UI Elements
     const conceptInput = document.getElementById("concept-input");
     const clearInputBtn = document.getElementById("clear-input-btn");
+    const micBtn = document.getElementById("mic-btn");
+    const listeningIndicator = document.getElementById("listening-indicator");
     const domainRadios = document.querySelectorAll('input[name="domain"]');
     
     // Enhancers checkboxes
@@ -34,11 +36,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const savedCount = document.getElementById("saved-count");
     const clearHistoryBtn = document.getElementById("clear-history-btn");
 
+    // Speech-to-Text State
+    let recognition = null;
+    let isListening = false;
+
     // LocalStorage keys
     const LOCAL_SAVED_KEY = "promptsmith_saved_prompts";
     const LOCAL_HISTORY_KEY = "promptsmith_history_prompts";
 
-    // Realistic Sample Ideas for Users
+    // Sample Ideas
     const sampleIdeas = [
         {
             title: "Cold Job Outreach Email",
@@ -73,12 +79,79 @@ document.addEventListener("DOMContentLoaded", () => {
         renderSampleIdeas();
         loadSidebarData();
         setupEventListeners();
+        setupVoiceDictation();
         resetForm();
         initBgAnimation();
     }
 
     // -------------------------------------------------------------
-    // 2. Render Sample Ideas
+    // 2. Web Speech API (Voice Dictation Module)
+    // -------------------------------------------------------------
+    function setupVoiceDictation() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = "en-US";
+
+            recognition.onstart = () => {
+                isListening = true;
+                micBtn.classList.add("active");
+                listeningIndicator.style.display = "flex";
+                showToast("Voice typing started. Speak your request!");
+            };
+
+            recognition.onresult = (event) => {
+                let currentTranscript = "";
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    currentTranscript += event.results[i][0].transcript;
+                }
+                if (currentTranscript.trim()) {
+                    conceptInput.value = currentTranscript;
+                    updateClearBtnVisibility();
+                    generateMasterPrompt();
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Speech recognition error:", event.error);
+                stopListening();
+                showToast("Microphone access error. Please try typing.");
+            };
+
+            recognition.onend = () => {
+                stopListening();
+            };
+
+            micBtn.addEventListener("click", () => {
+                if (isListening) {
+                    recognition.stop();
+                    stopListening();
+                } else {
+                    try {
+                        recognition.start();
+                    } catch (err) {
+                        console.error(err);
+                    }
+                }
+            });
+        } else {
+            micBtn.addEventListener("click", () => {
+                showToast("Speech recognition not supported in this browser. Try Chrome or Edge!");
+            });
+        }
+    }
+
+    function stopListening() {
+        isListening = false;
+        micBtn.classList.remove("active");
+        listeningIndicator.style.display = "none";
+    }
+
+    // -------------------------------------------------------------
+    // 3. Render Sample Ideas
     // -------------------------------------------------------------
     function renderSampleIdeas() {
         presetsGrid.innerHTML = "";
@@ -112,8 +185,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // -------------------------------------------------------------
-    // 3. Sentence-to-Master Prompt Transformer Logic
+    // 4. Smart Intent Analysis Engine
     // -------------------------------------------------------------
+    function detectIntent(userSentence) {
+        const text = userSentence.toLowerCase();
+
+        // Coding / Tech
+        if (text.match(/code|python|javascript|react|html|css|sql|script|build|develop|bug|api|database|algorithm|function|scrape|web|app|debug|fix|program/)) {
+            return "coding";
+        }
+        // Job / Career / Email / Sales
+        if (text.match(/email|job|resume|cover letter|recruiter|interview|business|sales|pitch|marketing|client|strategy|manager|career|post|linkedin/)) {
+            return "business";
+        }
+        // Study / Concept / Education
+        if (text.match(/explain|teach|understand|analogy|concept|math|physics|science|history|learn|study|roadmap|summary|difference|how does|why/)) {
+            return "learning";
+        }
+        // General / Creative
+        return "general";
+    }
+
     function generateMasterPrompt() {
         const userIdea = conceptInput.value.trim();
         if (!userIdea) {
@@ -127,43 +219,76 @@ document.addEventListener("DOMContentLoaded", () => {
         saveLibraryBtn.disabled = false;
 
         const selectedDomain = document.querySelector('input[name="domain"]:checked').value;
-        const roleConfig = getRoleConfig(selectedDomain);
+        const activeIntent = (selectedDomain === "general") ? detectIntent(userIdea) : selectedDomain;
 
-        let rules = [];
-        if (addStepByStep.checked) rules.push("- Break down your reasoning step-by-step before providing the final answer.");
-        if (addExamples.checked) rules.push("- Include concrete, practical real-world examples (and code blocks if applicable).");
-        if (addNoFluff.checked) rules.push("- Omit introductory pleasantries or fluff comments. Begin directly with the solution.");
-        if (addFormatting.checked) rules.push("- Structure the output cleanly in Markdown using headers (H2, H3), bold key terms, and bulleted lists.");
+        let promptText = "";
 
-        const promptText = `[ROLE & EXPERT PERSONA]
-${roleConfig}
+        // Customize layout based on detected intent
+        if (activeIntent === "coding") {
+            promptText = `[SYSTEM ROLE: SENIOR SOFTWARE ARCHITECT & ENGINEER]
 
-[PRIMARY GOAL]
-Directly address and fulfill the following user request:
+PROJECT OBJECTIVE:
+Develop a production-grade, optimized technical solution for the following request:
 "${userIdea}"
 
-[CONSTRAINTS & QUALITY RULES]
-${rules.length > 0 ? rules.join("\n") : "- Provide an accurate and comprehensive response."}
-- Explicitly identify any edge-cases, assumptions, or limitations.
+TECHNICAL REQUIREMENTS & CODE SPECIFICATION:
+1. CODE QUALITY: Write clean, modular, and well-commented code following industry best practices.
+2. ARCHITECTURE: Include robust exception handling, edge-case checks, and optimal time/space complexity.
+3. EXPLANATION: Include a brief technical walkthrough detailing key functions, dependencies, and setup steps.
+${addExamples.checked ? "4. DEMO CODE: Provide a complete, runnable code sample that can be tested immediately.\n" : ""}${addNoFluff.checked ? "5. CONCISENESS: Skip conversational greetings. Start directly with the code solution.\n" : ""}
+Let's build this step-by-step using clean code standards.`;
+        } 
+        else if (activeIntent === "business") {
+            promptText = `[EXPERT ROLE: EXECUTIVE COMMUNICATIONS & STRATEGY CONSULTANT]
 
-Let's think step-by-step to achieve the best result.`;
+COMMUNICATION MISSION:
+Formulate a high-impact, persuasive deliverable for the following request:
+"${userIdea}"
+
+STRATEGIC BLUEPRINT & STRUCTURE:
+1. SUBJECT LINE / HEADING: Provide 3 high-converting title or subject line options.
+2. HOOK & VALUE PROP: Begin with a compelling opening statement establishing immediate value.
+3. CONCISENESS: Keep the body text concise, action-focused, and free of unnecessary fluff.
+4. CALL-TO-ACTION (CTA): Conclude with a clear, friction-free next step for the reader.
+${addFormatting.checked ? "5. LAYOUT: Format with clean headers, bold key phrases, and bullet points.\n" : ""}
+Let's draft this professional response step-by-step.`;
+        }
+        else if (activeIntent === "learning") {
+            promptText = `[PEDAGOGICAL ROLE: FIRST-PRINCIPLES EDUCATOR & CONCEPT ANALYST]
+
+TEACHING GOAL:
+Create a comprehensive, easy-to-understand breakdown for:
+"${userIdea}"
+
+MASTERCLASS STRUCTURE:
+1. THE BIG PICTURE: Explain the core baseline concept in 2-3 simple, jargon-free sentences.
+2. MENTAL MODEL & METAPHOR: Map the concept onto a relatable everyday analogy or real-world process.
+3. CORE MECHANICS: Explain the top 3 key sub-components or underlying mechanisms.
+4. COMMON MISCONCEPTIONS: Highlight 2 common misunderstandings people have about this topic and clarify why they are wrong.
+${addStepByStep.checked ? "5. CHECKPOINT: End with a 2-question self-check quiz to test comprehension.\n" : ""}
+Let's break down this concept step-by-step.`;
+        }
+        else { // Creative / General
+            promptText = `[MASTER ROLE: SENIOR SUBJECT MATTER EXPERT & STRATEGIST]
+
+TASK OVERVIEW:
+Provide an authoritative, detailed, and structured response addressing:
+"${userIdea}"
+
+DELIVERABLE FRAMEWORK:
+1. EXECUTIVE SUMMARY: Provide a high-level summary of the core solution.
+2. ACTIONABLE STEPS: Detail a step-by-step methodology covering all primary milestones.
+${addExamples.checked ? "3. PRACTICAL EXAMPLES: Include 2-3 real-world scenarios illustrating the solution.\n" : ""}${addNoFluff.checked ? "4. DIRECT OUTPUT: Eliminate conversational filler. Begin directly with Section 1.\n" : ""}
+${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and structured bullet points." : ""} Let me know if you need any adjustments.`;
+        }
 
         promptOutput.value = promptText;
         updateStats();
         addToHistoryDebounced(userIdea, selectedDomain);
     }
 
-    function getRoleConfig(domain) {
-        switch (domain) {
-            case "coding": return "Act as a Senior Software Architect and Senior Engineer. Provide robust, clean, and highly optimized technical code solutions adhering to industry best practices.";
-            case "business": return "Act as an Executive Business Consultant and Professional Copywriter. Provide high-impact, persuasive, and structured responses.";
-            case "learning": return "Act as an Expert First-Principles Educator. Explain complex topics using clear intuition, analogies, and structured breakdowns.";
-            default: return "Act as an expert AI Assistant specializing in high-accuracy analysis, clear writing, and logical problem solving.";
-        }
-    }
-
     // -------------------------------------------------------------
-    // 4. Statistics Engine
+    // 5. Statistics Engine
     // -------------------------------------------------------------
     function updateStats() {
         const text = promptOutput.value;
@@ -176,7 +301,7 @@ Let's think step-by-step to achieve the best result.`;
     }
 
     // -------------------------------------------------------------
-    // 5. Persistence Operations (LocalStorage)
+    // 6. Persistence Operations (LocalStorage)
     // -------------------------------------------------------------
     saveLibraryBtn.addEventListener("click", () => {
         const idea = conceptInput.value.trim();
@@ -339,7 +464,7 @@ Let's think step-by-step to achieve the best result.`;
     }
 
     // -------------------------------------------------------------
-    // 6. Event Bindings & Utilities
+    // 7. Event Bindings & Utilities
     // -------------------------------------------------------------
     function setupEventListeners() {
         toggleSidebarBtn.addEventListener("click", () => {
@@ -353,6 +478,7 @@ Let's think step-by-step to achieve the best result.`;
 
         clearInputBtn.addEventListener("click", () => {
             conceptInput.value = "";
+            stopListening();
             updateClearBtnVisibility();
             generateMasterPrompt();
             conceptInput.focus();
@@ -393,7 +519,7 @@ Let's think step-by-step to achieve the best result.`;
 
     function updateClearBtnVisibility() {
         if (conceptInput.value.length > 0) {
-            clearInputBtn.style.display = "block";
+            clearInputBtn.style.display = "flex";
         } else {
             clearInputBtn.style.display = "none";
         }
@@ -401,6 +527,7 @@ Let's think step-by-step to achieve the best result.`;
 
     function resetForm() {
         conceptInput.value = "";
+        stopListening();
         domainRadios.forEach((radio, idx) => {
             radio.checked = idx === 0;
         });
@@ -414,7 +541,7 @@ Let's think step-by-step to achieve the best result.`;
         generateMasterPrompt();
     }
 
-    // Clean Ambient Particle Motion Canvas Animation
+    // Ambient Particle Motion Canvas Animation
     function initBgAnimation() {
         const canvas = document.getElementById("bg-canvas");
         if (!canvas) return;
