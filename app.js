@@ -1,4 +1,4 @@
-// Promptsmith - Smart Intent-Aware ChatGPT & Image Prompt Generator Engine
+// Promptsmith - Smart Intent-Aware ChatGPT & Image Prompt Generator Engine (Mobile Optimized)
 
 document.addEventListener("DOMContentLoaded", () => {
     // UI Elements
@@ -200,19 +200,15 @@ document.addEventListener("DOMContentLoaded", () => {
     function detectIntent(userSentence) {
         const text = userSentence.toLowerCase();
 
-        // Photo / Image Editing / Midjourney / DALL-E
         if (text.match(/photo|image|picture|edit|photograph|portrait|camera|lighting|midjourney|dall-e|photoshop|background|background removal|render|8k|lens|aspect ratio/)) {
             return "photo";
         }
-        // Coding / Tech
         if (text.match(/code|python|javascript|react|html|css|sql|script|build|develop|bug|api|database|algorithm|function|scrape|web|app|debug|fix|program/)) {
             return "coding";
         }
-        // Job / Career / Email
         if (text.match(/email|job|resume|cover letter|recruiter|interview|business|sales|pitch|marketing|client|strategy|manager|career|post|linkedin/)) {
             return "business";
         }
-        // Study / Concept
         if (text.match(/explain|teach|understand|analogy|concept|math|physics|science|history|learn|study|roadmap|summary|difference|how does|why/)) {
             return "learning";
         }
@@ -236,7 +232,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let promptText = "";
 
-        // Photography / Image AI Prompt Generation
         if (activeIntent === "photo") {
             promptText = `[AI IMAGE & PHOTOGRAPHY GENERATION / EDITING PROMPT]
 
@@ -252,7 +247,6 @@ ChatGPT PHOTO EDITING INSTRUCTIONS (For ChatGPT Vision / Photoshop AI):
 3. SUBJECT ISOLATION: Retain original subject sharpness while modifying background elements seamlessly.
 4. FINAL OUTPUT: Provide step-by-step editing parameters (exposure, contrast, highlights, shadows, color balance) to achieve this look.`;
         }
-        // Coding & Technical
         else if (activeIntent === "coding") {
             promptText = `[SYSTEM ROLE: SENIOR SOFTWARE ARCHITECT & ENGINEER]
 
@@ -267,7 +261,6 @@ TECHNICAL REQUIREMENTS & CODE SPECIFICATION:
 ${addExamples.checked ? "4. DEMO CODE: Provide a complete, runnable code sample that can be tested immediately.\n" : ""}${addNoFluff.checked ? "5. CONCISENESS: Skip conversational greetings. Start directly with the code solution.\n" : ""}
 Let's build this step-by-step using clean code standards.`;
         } 
-        // Business & Emails
         else if (activeIntent === "business") {
             promptText = `[EXPERT ROLE: EXECUTIVE COMMUNICATIONS & STRATEGY CONSULTANT]
 
@@ -283,7 +276,6 @@ STRATEGIC BLUEPRINT & STRUCTURE:
 ${addFormatting.checked ? "5. LAYOUT: Format with clean headers, bold key phrases, and bullet points.\n" : ""}
 Let's draft this professional response step-by-step.`;
         }
-        // Study & Learning
         else if (activeIntent === "learning") {
             promptText = `[PEDAGOGICAL ROLE: FIRST-PRINCIPLES EDUCATOR & CONCEPT ANALYST]
 
@@ -299,7 +291,6 @@ MASTERCLASS STRUCTURE:
 ${addStepByStep.checked ? "5. CHECKPOINT: End with a 2-question self-check quiz to test comprehension.\n" : ""}
 Let's break down this concept step-by-step.`;
         }
-        // General / Creative
         else {
             promptText = `[MASTER ROLE: SENIOR SUBJECT MATTER EXPERT & STRATEGIST]
 
@@ -574,7 +565,7 @@ ${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and s
     }
 
     // -------------------------------------------------------------
-    // 8. Technical AI Neural Data-Flow Background Canvas
+    // 8. Mobile-Optimized Neural Background Canvas
     // -------------------------------------------------------------
     function initBgAnimation() {
         const canvas = document.getElementById("bg-canvas");
@@ -584,7 +575,7 @@ ${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and s
         let nodes = [];
         let pulses = [];
         let floatingGlyphs = [];
-        const maxNodes = 45;
+        let maxNodes = 45;
         const connectionDist = 140;
         let mouseX = -1000;
         let mouseY = -1000;
@@ -594,14 +585,23 @@ ${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and s
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+            // Optimize node count on mobile devices to ensure 60fps & low battery consumption
+            maxNodes = window.innerWidth < 768 ? 18 : 45;
             populateNodes();
             populateGlyphs();
         }
         window.addEventListener("resize", resize);
 
+        // Touch and mouse event tracking
         window.addEventListener("mousemove", (e) => {
             mouseX = e.clientX;
             mouseY = e.clientY;
+        });
+        window.addEventListener("touchmove", (e) => {
+            if (e.touches.length > 0) {
+                mouseX = e.touches[0].clientX;
+                mouseY = e.touches[0].clientY;
+            }
         });
 
         class NeuralNode {
@@ -658,7 +658,8 @@ ${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and s
 
         function populateGlyphs() {
             floatingGlyphs = [];
-            for (let i = 0; i < 20; i++) {
+            const glyphCount = window.innerWidth < 768 ? 10 : 20;
+            for (let i = 0; i < glyphCount; i++) {
                 floatingGlyphs.push(new FloatingGlyph());
             }
         }
