@@ -190,19 +190,15 @@ document.addEventListener("DOMContentLoaded", () => {
     function detectIntent(userSentence) {
         const text = userSentence.toLowerCase();
 
-        // Coding / Tech
         if (text.match(/code|python|javascript|react|html|css|sql|script|build|develop|bug|api|database|algorithm|function|scrape|web|app|debug|fix|program/)) {
             return "coding";
         }
-        // Job / Career / Email / Sales
         if (text.match(/email|job|resume|cover letter|recruiter|interview|business|sales|pitch|marketing|client|strategy|manager|career|post|linkedin/)) {
             return "business";
         }
-        // Study / Concept / Education
         if (text.match(/explain|teach|understand|analogy|concept|math|physics|science|history|learn|study|roadmap|summary|difference|how does|why/)) {
             return "learning";
         }
-        // General / Creative
         return "general";
     }
 
@@ -223,7 +219,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let promptText = "";
 
-        // Customize layout based on detected intent
         if (activeIntent === "coding") {
             promptText = `[SYSTEM ROLE: SENIOR SOFTWARE ARCHITECT & ENGINEER]
 
@@ -268,7 +263,7 @@ MASTERCLASS STRUCTURE:
 ${addStepByStep.checked ? "5. CHECKPOINT: End with a 2-question self-check quiz to test comprehension.\n" : ""}
 Let's break down this concept step-by-step.`;
         }
-        else { // Creative / General
+        else {
             promptText = `[MASTER ROLE: SENIOR SUBJECT MATTER EXPERT & STRATEGIST]
 
 TASK OVERVIEW:
@@ -541,29 +536,45 @@ ${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and s
         generateMasterPrompt();
     }
 
-    // Ambient Particle Motion Canvas Animation
+    // -------------------------------------------------------------
+    // 8. Technical AI Neural Data-Flow Background Canvas
+    // -------------------------------------------------------------
     function initBgAnimation() {
         const canvas = document.getElementById("bg-canvas");
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
         
-        let particles = [];
-        const maxParticles = 30;
+        let nodes = [];
+        let pulses = [];
+        let floatingGlyphs = [];
+        const maxNodes = 45;
+        const connectionDist = 140;
+        let mouseX = -1000;
+        let mouseY = -1000;
         
+        const aiGlyphs = ["01", "10", "λ", "Σ", "f(x)", "AI", "GPT", "θ", "∇", "1", "0"];
+
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+            populateNodes();
+            populateGlyphs();
         }
         window.addEventListener("resize", resize);
-        resize();
-        
-        class Particle {
+
+        // Track mouse proximity for synapse interaction
+        window.addEventListener("mousemove", (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        class NeuralNode {
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.vx = (Math.random() - 0.5) * 0.25;
-                this.vy = (Math.random() - 0.5) * 0.25;
-                this.radius = Math.random() * 1.5 + 1;
+                this.vx = (Math.random() - 0.5) * 0.4;
+                this.vy = (Math.random() - 0.5) * 0.4;
+                this.radius = Math.random() * 1.8 + 1.2;
             }
             update() {
                 this.x += this.vx;
@@ -574,21 +585,126 @@ ${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and s
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = "rgba(56, 189, 248, 0.25)";
+                ctx.fillStyle = "rgba(56, 189, 248, 0.4)";
                 ctx.fill();
             }
         }
-        
-        for (let i = 0; i < maxParticles; i++) {
-            particles.push(new Particle());
+
+        class FloatingGlyph {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + Math.random() * 50;
+                this.vy = - (Math.random() * 0.4 + 0.2);
+                this.char = aiGlyphs[Math.floor(Math.random() * aiGlyphs.length)];
+                this.opacity = Math.random() * 0.2 + 0.05;
+                this.size = Math.floor(Math.random() * 6 + 10);
+            }
+            update() {
+                this.y += this.vy;
+                if (this.y < -20) this.reset();
+            }
+            draw() {
+                ctx.font = `${this.size}px 'Inter', monospace`;
+                ctx.fillStyle = `rgba(129, 140, 248, ${this.opacity})`;
+                ctx.fillText(this.char, this.x, this.y);
+            }
         }
-        
+
+        function populateNodes() {
+            nodes = [];
+            for (let i = 0; i < maxNodes; i++) {
+                nodes.push(new NeuralNode());
+            }
+        }
+
+        function populateGlyphs() {
+            floatingGlyphs = [];
+            for (let i = 0; i < 20; i++) {
+                floatingGlyphs.push(new FloatingGlyph());
+            }
+        }
+
+        resize();
+
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < particles.length; i++) {
-                particles[i].update();
-                particles[i].draw();
+
+            // 1. Draw Floating AI Tech Glyphs
+            for (let i = 0; i < floatingGlyphs.length; i++) {
+                floatingGlyphs[i].update();
+                floatingGlyphs[i].draw();
             }
+
+            // 2. Draw Neural Connections & Signals
+            for (let i = 0; i < nodes.length; i++) {
+                const n1 = nodes[i];
+                n1.update();
+                n1.draw();
+
+                // Mouse interaction synapse
+                const mouseDx = n1.x - mouseX;
+                const mouseDy = n1.y - mouseY;
+                const mouseDist = Math.sqrt(mouseDx * mouseDx + mouseDy * mouseDy);
+                if (mouseDist < 160) {
+                    const alpha = (1 - mouseDist / 160) * 0.35;
+                    ctx.beginPath();
+                    ctx.moveTo(n1.x, n1.y);
+                    ctx.lineTo(mouseX, mouseY);
+                    ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`;
+                    ctx.lineWidth = 1.2;
+                    ctx.stroke();
+                }
+
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const n2 = nodes[j];
+                    const dx = n1.x - n2.x;
+                    const dy = n1.y - n2.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < connectionDist) {
+                        const alpha = (1 - dist / connectionDist) * 0.2;
+                        ctx.beginPath();
+                        ctx.moveTo(n1.x, n1.y);
+                        ctx.lineTo(n2.x, n2.y);
+                        ctx.strokeStyle = `rgba(129, 140, 248, ${alpha})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.stroke();
+
+                        // Random signal pulse traveling on laser line
+                        if (Math.random() < 0.003) {
+                            pulses.push({
+                                x: n1.x, y: n1.y,
+                                targetX: n2.x, targetY: n2.y,
+                                progress: 0
+                            });
+                        }
+                    }
+                }
+            }
+
+            // 3. Draw Traveling Signal Pulses
+            for (let i = pulses.length - 1; i >= 0; i--) {
+                const p = pulses[i];
+                p.progress += 0.04;
+                const currX = p.x + (p.targetX - p.x) * p.progress;
+                const currY = p.y + (p.targetY - p.y) * p.progress;
+
+                ctx.beginPath();
+                ctx.arc(currX, currY, 2, 0, Math.PI * 2);
+                ctx.fillStyle = "rgba(56, 189, 248, 0.8)";
+                ctx.shadowColor = "#38bdf8";
+                ctx.shadowBlur = 8;
+                ctx.fill();
+                ctx.shadowBlur = 0; // reset blur
+
+                if (p.progress >= 1) {
+                    pulses.splice(i, 1);
+                }
+            }
+
             requestAnimationFrame(animate);
         }
         animate();

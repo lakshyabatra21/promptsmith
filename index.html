@@ -41,13 +41,13 @@
 
     <!-- HERO INTRO BANNER -->
     <section class="hero-banner">
-        <h1>Transform Simple Ideas Into <span class="gradient-text">Master ChatGPT Prompts</span></h1>
-        <p>Type what you want to achieve in plain English. Promptsmith automatically structures your idea into a professional prompt for accurate, detailed AI responses.</p>
+        <h1>Transform Ideas & Voice Into <span class="gradient-text">Master ChatGPT Prompts</span></h1>
+        <p>Type or speak what you want to achieve. Promptsmith automatically structures your idea into a professional prompt for accurate AI responses.</p>
         
         <div class="trust-pills">
+            <span class="pill">🎙️ Voice Typing Supported</span>
             <span class="pill">⚡ Works with ChatGPT (GPT-4o), Claude 3.5 & Gemini</span>
             <span class="pill">🔒 Runs 100% in Browser</span>
-            <span class="pill">🎯 No AI Jargon Required</span>
         </div>
     </section>
 
@@ -89,13 +89,33 @@
                 </div>
 
                 <div class="input-section">
-                    <!-- Main Textarea -->
+                    <!-- Main Textarea with Voice Dictation Button -->
                     <div class="input-group">
                         <div class="concept-input-container">
-                            <textarea id="concept-input" class="idea-textarea" placeholder="Example: Write a cold email to a tech recruiter for a software developer role, or Explain machine learning to a non-tech manager..." rows="4"></textarea>
-                            <button id="clear-input-btn" class="clear-btn" title="Clear text">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                            </button>
+                            <textarea id="concept-input" class="idea-textarea" placeholder="Type or click the microphone to speak your idea (e.g. Write a cold email for a developer job...)" rows="4"></textarea>
+                            
+                            <!-- Input Control Buttons -->
+                            <div class="input-controls">
+                                <!-- Voice Dictation Mic Button -->
+                                <button id="mic-btn" class="icon-btn mic-btn" title="Voice Typing (Speak your idea)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                                    </svg>
+                                </button>
+                                <!-- Clear Text Button -->
+                                <button id="clear-input-btn" class="icon-btn clear-btn" title="Clear text">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Listening Indicator Pill -->
+                        <div id="listening-indicator" class="listening-status" style="display:none;">
+                            <span class="recording-pulse"></span>
+                            <span>Listening... Speak your request clearly</span>
                         </div>
                     </div>
 
@@ -229,9 +249,9 @@
     <!-- TRUST FOOTER -->
     <section class="trust-features">
         <div class="feature-item">
-            <div class="feature-icon">🎯</div>
-            <h4>Eliminate Vague Answers</h4>
-            <p>Generic ChatGPT prompts yield generic responses. Promptsmith inserts specific constraints so ChatGPT gives exact answers.</p>
+            <div class="feature-icon">🎙️</div>
+            <h4>Voice Dictation Engine</h4>
+            <p>Click the microphone to dictate your prompt using speech-to-text for hands-free prompt generation.</p>
         </div>
         <div class="feature-item">
             <div class="feature-icon">🔒</div>
