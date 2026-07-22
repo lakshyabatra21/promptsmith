@@ -328,7 +328,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     ? correctedValue[0].toUpperCase() + correctedValue.slice(1)
                     : correctedValue;
                 
-                // Defensive extraction of punctuation prefixes and suffixes (prevents Null Pointer crash)
                 const puncStartMatch = word.match(/^[.,\/#!$%\^&\*;:{}=\-_`~()?"']+/);
                 const puncEndMatch = word.match(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']+$/);
                 const puncStart = puncStartMatch ? puncStartMatch[0] : "";
@@ -408,14 +407,21 @@ document.addEventListener("DOMContentLoaded", () => {
         promptOutput.value = "Optimizing via Live AI... Please wait...";
         promptOutput.style.opacity = "0.6";
 
-        let systemInstruction = `You are a world-class prompt engineer. Your goal is to transform the user's raw idea into an extremely powerful, detailed, and context-expanded prompt targeting other LLM AI Agents (like ChatGPT, Claude, and Gemini).
-DO NOT talk to the user. Do NOT write greetings, summaries, or conversational filler.
-DO NOT use markdown code blocks (\`\`\` or \`\`\`markdown) to wrap your prompt.
-Write ONLY the final prompt body itself. The prompt must start directly with the instruction directive (e.g. "Act as a..." or "You are...").
-Ensure the engineered prompt is purely accurate, direct, and completely ready to run.
+        let systemInstruction = `You are a Principal Prompt Architect. Your objective is to compile the user's raw idea into the absolute highest quality prompt in the world. 
+Structure the prompt systematically using the CO-STAR framework:
 
-User Raw Idea: "${userIdea}"
-Target Category: ${activeIntent.toUpperCase()}`;
+1. [ROLE & EXPERT PROFILE]: Assign a specific, authoritative expert role (e.g. "Act as a Principal System Engineer...").
+2. [CONTEXT & OBJECTIVE]: Clearly detail the background and target deliverables.
+3. [STYLE & TONE]: Enforce a professional, clear, and direct instruction tone.
+4. [TECHNICAL CONSTRAINTS & EDGE CASES]: Specify strict boundaries, quality rules, and error-handling steps appropriate for this domain (${activeIntent.toUpperCase()}).
+5. [RESPONSE FORMATTING]: Define clear markdown headers or organization schemas.
+
+OUTPUT COMPLIANCE CRITICAL RULES:
+- Output ONLY the ready-to-run prompt text itself.
+- Do NOT output any introduction (like "Here is the prompt:"), conversational pleasantries, or code block formatting wrappers (\`\`\` or \`\`\`markdown).
+- The prompt must start directly with the role declaration.
+
+User Raw Idea: "${userIdea}"`;
 
         try {
             if (provider === "gemini") {
@@ -490,7 +496,7 @@ Target Category: ${activeIntent.toUpperCase()}`;
     }
 
     // -------------------------------------------------------------
-    // 7. Offline Local Prompt Templates Generator
+    // 7. Gold Standard Offline Local Prompt Templates Generator
     // -------------------------------------------------------------
     function generateLocalTemplate(userIdea, activeIntent) {
         let promptText = "";
@@ -498,19 +504,23 @@ Target Category: ${activeIntent.toUpperCase()}`;
         if (activeIntent === "photo") {
             const isEditing = userIdea.toLowerCase().match(/edit|change|remove|replace|modify/);
             if (isEditing) {
-                promptText = `ACT AS A DIGITAL RETOUCHER AND PHOTOSHOP AI SPECIALIST. Modify the following visual asset based on these instructions: "${userIdea}".
+                promptText = `ACT AS A DIGITAL RETOUCHER AND PHOTOSHOP SPECIALIST. Modify the visual asset based on these parameters: "${userIdea}".
+
+TECHNICAL STEPS:
+1. Composition Alignment: Match ambient lighting angles, contrast indices, and edge shadows between old and new subjects.
+2. Background Blending: Feather edges of all replaced sections using a 1.5px radius mask to eliminate hard visual lines.
+3. Dynamic Shadows: Render contact shadows (dark, sharp base lines) and soft cast shadows matching the primary light source direction.
+4. Color Grading: Perform a color balance alignment matching the Kelvin temperature of the background color space.
+5. Deliver a step-by-step list of adjustments for manual execution in Photoshop (Exposure, Highlights, Shadows, Color balance).`;
+            } else {
+                promptText = `ACT AS A WORLD-CLASS PHOTOGRAPHER AND MIDJOURNEY ART DIRECTOR. Generate an ultra-detailed image prompt command for the concept: "${userIdea}".
 
 TECHNICAL PARAMETERS:
-1. Composition: Align light source coordinates and contrast values between elements.
-2. Feathering: Blend edges of replaced layers using a 1.5px radius mask to eliminate seams.
-3. Light & Shadows: Match ambient light direction. Render contact shadows and soft cast shadows.
-4. Color Balance: Match ambient Kelvin temperature to fit the background color space.
-5. Manually edit Photoshop Exposure, Highlights, Shadows, and Color channels to complete the request.`;
-            } else {
-                promptText = `ACT AS A COMMERCIAL PHOTOGRAPHER. Generate an ultra-detailed image generation command matching this concept: "${userIdea}".
-
-OUTPUT FORMAT (Write only this line):
-/imagine prompt: ${userIdea}, shot on Hasselblad H6D-100c, 85mm lens, f/1.4 aperture, cinematic Rembrandt lighting, volumetric mist, hyperrealistic skin textures, 8k resolution, color graded in warm teal and orange --ar 16:9 --style raw --v 6.0`;
+1. Camera Setup: Shot on Hasselblad H6D-100c, 85mm f/1.4 prime lens, shallow depth of field, sharp subject focus.
+2. Lighting Profile: Cinematic Rembrandt lighting, dramatic low-key contrast, warm golden hour backlighting, and volumetric mist.
+3. Texture Detail: Hyperrealistic skin pores, detailed surface textures, floating micro-dust, and reflections.
+4. Color Grade: Warm amber tones and cool teal shadows.
+5. Commands: Output only the instruction command starting with "/imagine prompt: ${userIdea}, Hasselblad..." followed by "--ar 16:9 --style raw --v 6.0".`;
             }
         }
         else if (activeIntent === "coding") {
@@ -518,53 +528,53 @@ OUTPUT FORMAT (Write only this line):
             if (userIdea.toLowerCase().match(/python/)) language = "Python 3.11+";
             else if (userIdea.toLowerCase().match(/javascript|js/)) language = "modern ES6+ JavaScript";
             else if (userIdea.toLowerCase().match(/react/)) language = "React 18";
-            else if (userIdea.toLowerCase().match(/html|css/)) language = "semantic HTML5 & CSS Grid";
-            else if (userIdea.toLowerCase().match(/sql/)) language = "PostgreSQL";
+            else if (userIdea.toLowerCase().match(/html|css/)) language = "semantic HTML5 & CSS Grid layouts";
+            else if (userIdea.toLowerCase().match(/sql/)) language = "PostgreSQL optimized queries";
 
             let details = "";
             if (userIdea.toLowerCase().match(/scrape|scraper/)) {
                 details = `
-- Implement rotating User-Agents and custom headers to bypass scraping blocks.
-- Wrap execution blocks in try-except statements managing HTTP 403, 429, and timeouts.
-- Implement a 1.5s rate-limit delay between loops.
-- Export all data structures into CSV.`;
+- Implement rotating User-Agents and HTTP request headers to prevent anti-bot bans.
+- Wrap all network loops in try-catch statements managing HTTP 403, 429, and timeouts.
+- Implement a 1.5s rate-limit delay between recursive requests.
+- Export all parsed data structures into clean CSV formats.`;
             } else if (userIdea.toLowerCase().match(/react|app|web/)) {
                 details = `
-- Write clean functional components using React Hooks (useState, useEffect).
-- Keep component states modular and implement useMemo optimizations.
-- Ensure layouts are fully responsive and meet accessibility guidelines.`;
+- Write clean functional components utilizing React Hooks (useState, useEffect).
+- Keep components modular and memoize performance-heavy calculations with useMemo.
+- Ensure layouts are fully responsive and meet accessibility guidelines (ARIA labels).`;
             } else if (userIdea.toLowerCase().match(/sql|database/)) {
                 details = `
-- Provide performance indexing recommendations.
+- Provide SQL performance indexing recommendations for queried fields.
 - Avoid nested subqueries; use JOIN operations or Common Table Expressions (CTEs).`;
             }
 
-            promptText = `ACT AS A PRINCIPAL SOFTWARE ARCHITECT. Write a production-grade, modular implementation in ${language} for: "${userIdea}".
+            promptText = `ACT AS A PRINCIPAL SOFTWARE ARCHITECT. Write a production-grade, highly optimized modular solution in ${language} for: "${userIdea}".
 ${details}
 STANDARDS:
-1. Maintain clean variables and descriptive names.
-2. Include try-catch validation blocks.
-3. Write clean, readable code with inline comments.
-4. Output a single copy-pasteable script including a mock runnable test case. Avoid conversational conversational intros.`;
+1. Naming: Maintain strict camelCase/snake_case naming conventions and dry structure.
+2. Safety: Wrap code in try-catch/try-except statements handling file I/O or network failures.
+3. Cleanliness: Provide clear, descriptive inline comments.
+4. Deliverable: Output a single copy-pasteable script including a mock runnable test case. Do NOT write introductions or explanations.`;
         } 
         else if (activeIntent === "business") {
             const isEmail = userIdea.toLowerCase().match(/email|outreach|message/);
             if (isEmail) {
-                promptText = `ACT AS A CONVERSION COPYWRITER. Write a high-converting cold outreach template targeting: "${userIdea}".
+                promptText = `ACT AS A CONVERSION COPYWRITER. Write a high-converting cold outreach email based on this objective: "${userIdea}".
 
 STRUCTURE CONSTRAINTS:
-1. Provide 3 optimized subject lines under 6 words.
-2. Hook: Lead with a personalized value hook in the first 2 sentences. No generic openings.
-3. Core Value: Bullet point 2 achievements with quantifiable metrics.
-4. CTA: Close with a low-barrier appointment scheduling question.
+1. Subject Lines: Provide 3 optimized subject lines under 6 words targeting high open rates.
+2. Hook: Open with a personalized value hook statement in the first 2 sentences. No conversational filler.
+3. Metrics: Bullet point 2 quantifiable achievements (e.g. "reduced server latency by 35%").
+4. CTA: Close with a low-friction scheduling question.
 5. Limit total email length to under 150 words.`;
             } else {
-                promptText = `ACT AS A STRATEGIC MANAGEMENT CONSULTANT. Formulate a business framework for: "${userIdea}".
+                promptText = `ACT AS A STRATEGIC MANAGEMENT CONSULTANT. Formulate a professional business deliverable for the request: "${userIdea}".
 
 STRUCTURE CONSTRAINTS:
-1. Executive Summary: Provide a 3-sentence project objective.
-2. Implementation Roadmap: Provide a step-by-step milestone timeline.
-3. Success Metrics: Define 3 key performance indicators (KPIs).
+1. Executive Summary: Deliver a 3-sentence project objective.
+2. Implementation Roadmap: Deliver a step-by-step milestone timeline.
+3. Success Metrics: Define 3 key performance indicators (KPIs) to track.
 4. Risk Profile: Outline 2 operational risks and mitigation plans.`;
             }
         }
@@ -572,10 +582,10 @@ STRUCTURE CONSTRAINTS:
             promptText = `ACT AS A FIRST-PRINCIPLES PEDAGOGIST. Explain this concept step-by-step: "${userIdea}".
 
 DELIVERABLE LAYOUT:
-1. Under 10s: Explain the core concept simply to a child.
-2. Metaphor: Map the concept mechanics onto a familiar everyday object or system (e.g. plumbing/cooking).
-3. Technical Terms: Explain the top 3 specialized terms.
-4. Misconceptions: Correct 2 common myths.
+1. Baseline: Explain the core concept simply to a 10-year-old child in 2 sentences.
+2. Metaphor: Map the concept mechanics onto a familiar everyday object or system (e.g. water pipes/cooking recipes).
+3. Technical Terms: Explain the top 3 specialized terms simply.
+4. Misconceptions: Correct 2 common myths people make when studying this.
 5. Quiz: End with a 2-question self-check.`;
         }
         else {
