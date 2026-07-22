@@ -1,4 +1,4 @@
-// Promptsmith - Smart Intent-Aware ChatGPT & Image Prompt Generator Engine
+// Promptsmith - High-Trust Next-Gen Prompt Expansion Engine
 
 document.addEventListener("DOMContentLoaded", () => {
     // UI Elements
@@ -9,12 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const domainRadios = document.querySelectorAll('input[name="domain"]');
     const autocorrectBanner = document.getElementById("autocorrect-banner");
     const autocorrectText = document.getElementById("autocorrect-text");
-    
-    // Enhancers checkboxes
-    const addStepByStep = document.getElementById("add-step-by-step");
-    const addExamples = document.getElementById("add-examples");
-    const addNoFluff = document.getElementById("add-no-fluff");
-    const addFormatting = document.getElementById("add-formatting");
+    const consoleLogs = document.getElementById("console-logs");
     
     // Output & Buttons
     const promptOutput = document.getElementById("prompt-output");
@@ -47,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const LOCAL_SAVED_KEY = "promptsmith_saved_prompts";
     const LOCAL_HISTORY_KEY = "promptsmith_history_prompts";
 
-    // Common technology & prompt typos dictionary
+    // Typo Dictionary
     const typoDict = {
         "quantume": "quantum",
         "pythn": "python",
@@ -72,31 +67,31 @@ document.addEventListener("DOMContentLoaded", () => {
         "articel": "article"
     };
 
-    // Sample Ideas
+    // Preset Ideas
     const sampleIdeas = [
         {
-            title: "Cinematic Portrait Photo",
-            category: "Photo & Image AI",
-            domain: "photo",
-            idea: "A cinematic portrait of a cybernetic engineer in a futuristic neon lab, shot on 85mm lens, golden hour lighting, 8k hyperrealistic."
+            title: "Beautiful Python Web Scraper",
+            category: "Code & Tech",
+            domain: "coding",
+            idea: "Write a python web scrpe script using beautifulsoup to get product details."
         },
         {
-            title: "Product Background Editing",
-            category: "Photo & Image AI",
-            domain: "photo",
-            idea: "Edit an existing product photo to place a luxury perfume bottle on a sleek black marble surface surrounded by soft water ripples."
-        },
-        {
-            title: "Cold Job Outreach Email",
-            category: "Job & Email",
+            title: "Cold Email to Tech Recruiter",
+            category: "Career & Business",
             domain: "business",
-            idea: "Write a high-converting, professional cold email to a tech recruiter expressing interest in a Software Engineer role."
+            idea: "Write a cold outreach email to a tech recruter for a software developer role."
         },
         {
-            title: "Explain Neural Networks Simply",
-            category: "Study & Explain",
+            title: "Explain Quantum Physics simply",
+            category: "Concept Explain",
             domain: "learning",
-            idea: "Explain how Artificial Neural Networks learn using a factory assembly line analogyy."
+            idea: "Explain quantume physics in simple terms with a factory analogyy."
+        },
+        {
+            title: "Cinematic Portrait Prompt",
+            category: "Photo & Image AI",
+            domain: "photo",
+            idea: "A photograpgh of an old astronaut looking at a neon city on Mars."
         }
     ];
 
@@ -110,10 +105,28 @@ document.addEventListener("DOMContentLoaded", () => {
         setupVoiceDictation();
         resetForm();
         initBgAnimation();
+        addConsoleLog("Promptsmith kernel loaded successfully.", true);
+        addConsoleLog("Auto-spelling system standby.", true);
     }
 
     // -------------------------------------------------------------
-    // 2. Robust Web Speech API (Voice Dictation Module)
+    // 2. Browser console logger simulator
+    // -------------------------------------------------------------
+    function addConsoleLog(message, isMuted = false) {
+        if (!consoleLogs) return;
+        const line = document.createElement("div");
+        line.className = "log-line" + (isMuted ? " text-muted" : "");
+        line.textContent = `> ${message}`;
+        consoleLogs.appendChild(line);
+        consoleLogs.scrollTop = consoleLogs.scrollHeight;
+        
+        while (consoleLogs.children.length > 8) {
+            consoleLogs.removeChild(consoleLogs.firstChild);
+        }
+    }
+
+    // -------------------------------------------------------------
+    // 3. Web Speech API (Voice Dictation Module)
     // -------------------------------------------------------------
     function setupVoiceDictation() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -132,6 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 micBtn.classList.add("active");
                 listeningIndicator.style.display = "flex";
                 showToast("🎙️ Listening... Speak your request!");
+                addConsoleLog("Voice capture stream initialized.");
                 startVoiceWaveAnimation();
             };
 
@@ -143,15 +157,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (currentTranscript.trim()) {
                     conceptInput.value = (initialText ? initialText.trim() + " " : "") + currentTranscript.trim();
                     updateClearBtnVisibility();
-                    // Process spelling correction on input
-                    processSpellingCorrection();
-                    generateMasterPrompt();
+                    
+                    // Live autocorrect debounced
+                    clearTimeout(autocorrectTimeout);
+                    autocorrectTimeout = setTimeout(() => {
+                        processSpellingCorrection(true);
+                    }, 500);
                 }
             };
 
             recognition.onerror = (event) => {
                 console.error("Speech recognition error:", event.error);
                 stopListening();
+                addConsoleLog(`Voice stream error: ${event.error}`, true);
 
                 if (event.error === "not-allowed" || event.error === "service-not-allowed") {
                     alert("Microphone Permission Blocked!\n\nTo enable voice typing:\n1. Click the Lock icon 🔒 in your browser address bar.\n2. Turn ON 'Microphone' permission.\n3. Refresh the page and try again!");
@@ -164,6 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             recognition.onend = () => {
                 stopListening();
+                addConsoleLog("Voice capture stream closed.");
             };
 
             micBtn.addEventListener("click", () => {
@@ -195,9 +214,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // -------------------------------------------------------------
-    // Sine-wave visualizer animation
-    // -------------------------------------------------------------
     function startVoiceWaveAnimation() {
         const waveCanvas = document.getElementById("voice-wave-canvas");
         if (!waveCanvas) return;
@@ -209,7 +225,6 @@ document.addEventListener("DOMContentLoaded", () => {
             waveCtx.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
             step += 0.15;
             
-            // Draw three overlapping sine waves (Cyan, Indigo, faint Purple)
             drawSineWave(waveCtx, waveCanvas, step, 11, "rgba(56, 189, 248, 0.65)", 1.5, 0.05);
             drawSineWave(waveCtx, waveCanvas, step + 2, 7, "rgba(129, 140, 248, 0.5)", 1.0, 0.08);
             drawSineWave(waveCtx, waveCanvas, step + 4, 14, "rgba(56, 189, 248, 0.2)", 2.0, 0.03);
@@ -237,7 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // -------------------------------------------------------------
-    // 3. Render Sample Ideas
+    // 4. Render Sample Ideas
     // -------------------------------------------------------------
     function renderSampleIdeas() {
         presetsGrid.innerHTML = "";
@@ -266,22 +281,25 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         updateClearBtnVisibility();
-        // Run auto-correction on loaded samples if necessary
-        processSpellingCorrection();
+        addConsoleLog(`Preset loaded: "${item.title}"`);
+        processSpellingCorrection(true); // force autocorrect immediately for presets
         generateMasterPrompt();
         showToast("Sample prompt loaded!");
     }
 
     // -------------------------------------------------------------
-    // 4. Live Spelling Auto-Correct System
+    // 5. Debounced Spelling Autocorrect (Preserves Cursor Focus)
     // -------------------------------------------------------------
     let autocorrectTimeout;
-    function processSpellingCorrection() {
+    function processSpellingCorrection(force = false) {
         const text = conceptInput.value;
         if (!text.trim()) {
             autocorrectBanner.style.display = "none";
             return;
         }
+
+        const selectionStart = conceptInput.selectionStart;
+        const selectionEnd = conceptInput.selectionEnd;
 
         // Tokenize words, check against autocorrect dictionary
         const words = text.split(/\s+/);
@@ -290,17 +308,14 @@ document.addEventListener("DOMContentLoaded", () => {
         let correctionList = [];
 
         words.forEach(word => {
-            // Strip punctuation for matching
             const cleanWord = word.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "");
             if (typoDict[cleanWord]) {
                 const correctedValue = typoDict[cleanWord];
-                // Keep original case if capitalized
                 const isCapitalized = word[0] === word[0].toUpperCase();
                 const replacement = isCapitalized 
                     ? correctedValue[0].toUpperCase() + correctedValue.slice(1)
                     : correctedValue;
                 
-                // Re-apply punctuation
                 const puncStart = word.match(/^[.,\/#!$%\^&\*;:{}=\-_`~()?"']*/)[0];
                 const puncEnd = word.match(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']*$/)[0];
                 
@@ -314,18 +329,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (correctedCount > 0) {
             conceptInput.value = correctedWords.join(" ");
-            autocorrectText.textContent = `Auto-corrected spelling: ${correctionList.join(", ")}`;
+            
+            // Restore selection caret index so typing is not interrupted
+            conceptInput.setSelectionRange(selectionStart, selectionEnd);
+
+            autocorrectText.textContent = `Auto-corrected: ${correctionList.join(", ")}`;
             autocorrectBanner.style.display = "flex";
+            addConsoleLog(`Spelling patch applied: ${correctionList.join(", ")}`);
 
             clearTimeout(autocorrectTimeout);
             autocorrectTimeout = setTimeout(() => {
                 autocorrectBanner.style.display = "none";
-            }, 5000);
+            }, 6000);
         }
     }
 
     // -------------------------------------------------------------
-    // 5. Smart Intent & Photo/Image Generation Logic
+    // 6. Deep Context Prompt Expansion Parser (On-spot accurate generation)
     // -------------------------------------------------------------
     function detectIntent(userSentence) {
         const text = userSentence.toLowerCase();
@@ -360,88 +380,116 @@ document.addEventListener("DOMContentLoaded", () => {
         const selectedDomain = document.querySelector('input[name="domain"]:checked').value;
         const activeIntent = (selectedDomain === "general") ? detectIntent(userIdea) : selectedDomain;
 
+        addConsoleLog(`Intent identified: ${activeIntent.toUpperCase()}`);
+        addConsoleLog(`Building on-spot context mapping...`);
+
         let promptText = "";
 
+        // Custom Context Expansion Logic
         if (activeIntent === "photo") {
-            promptText = `[AI IMAGE & PHOTOGRAPHY GENERATION / EDITING PROMPT]
+            // Is it photo editing or image generation?
+            const isEditing = userIdea.toLowerCase().match(/edit|change|remove|replace|modify/);
+            if (isEditing) {
+                promptText = `You are a high-end Digital Retoucher and Photoshop AI Specialist. Your task is to modify a photo according to these specific edits: "${userIdea}".
 
-SUBJECT & CONCEPT REQUEST:
-"${userIdea}"
+Follow these advanced technical parameters to generate the edit:
+1. Composition Alignment: Analyze the lighting angle, contrast curve, and edge occlusion of the existing subject.
+2. Background Blending: Feather the edges of replaced objects using a 1.5px radius mask to eliminate visual borders.
+3. Shadows & Relighting: Match the light source direction. Render contact shadows (dark, sharp occlusion shadows at bases) and soft cast shadows.
+4. Color Matching: Perform a color balance matching the ambient temperature (Kelvin) of the background.
+5. Provide step-by-step instructions on adjusting Exposure, Highlights, Shadows, and Color channels to manually refine the edit in Adobe Lightroom or Photoshop.`;
+            } else {
+                promptText = `You are an expert Commercial Photographer and AI Prompt Engineer. Expand the following visual idea into an ultra-detailed Midjourney / DALL-E 3 image generation prompt: "${userIdea}".
 
-OPTIMIZED MIDJOURNEY / DALL-E 3 / STABLE DIFFUSION PROMPT:
-/imagine prompt: ${userIdea}, shot on 85mm f/1.4 lens, professional studio lighting, hyperrealistic, 8k resolution, ultra-detailed textures, volumetric atmospheric depth, photorealistic render, color graded --ar 16:9 --style raw --v 6.0
-
-ChatGPT PHOTO EDITING INSTRUCTIONS (For ChatGPT Vision / Photoshop AI):
-1. IMAGE COMPOSITION: Analyze the provided image and apply the edit specified: "${userIdea}".
-2. LIGHTING & COLOR: Match key light directions, ambient fill shadows, and color temperature.
-3. SUBJECT ISOLATION: Retain original subject sharpness while modifying background elements seamlessly.
-4. FINAL OUTPUT: Provide step-by-step editing parameters (exposure, contrast, highlights, shadows, color balance) to achieve this look.`;
+Generate the prompt using this exact structure:
+/imagine prompt: ${userIdea}, shot on Hasselblad H6D-100c, 85mm f/1.4 lens, cinematic Rembrandt lighting with warm golden hour backlighting, volumetric haze, hyperrealistic skin textures, 8k resolution, photorealistic render, color graded in teal and orange palette, highly detailed background scenery --ar 16:9 --style raw --v 6.0`;
+            }
         }
         else if (activeIntent === "coding") {
-            promptText = `[SYSTEM ROLE: SENIOR SOFTWARE ARCHITECT & ENGINEER]
+            // Check specific languages or frameworks
+            let language = "modern code";
+            if (userIdea.toLowerCase().match(/python/)) language = "Python 3.11+";
+            else if (userIdea.toLowerCase().match(/javascript|js/)) language = "modern ES6+ JavaScript";
+            else if (userIdea.toLowerCase().match(/react/)) language = "React 18 with functional hooks";
+            else if (userIdea.toLowerCase().match(/html|css/)) language = "semantic HTML5 and responsive modern CSSGrid";
+            else if (userIdea.toLowerCase().match(/sql/)) language = "PostgreSQL optimized queries";
 
-PROJECT OBJECTIVE:
-Develop a production-grade, optimized technical solution for the following request:
-"${userIdea}"
+            let details = "";
+            if (userIdea.toLowerCase().match(/scrape|scraper/)) {
+                details = `\nSPECIFIC MODULE INSTRUCTIONS:
+- Implement rotating User-Agents and HTTP headers to prevent anti-bot blocking.
+- Add robust exception handling for HTTP 403 (Forbidden), 429 (Too Many Requests), and network timeouts.
+- Include a 1.5 second rate-limiting delay between recursive requests.
+- Export parsed DOM elements into a clean CSV layout.`;
+            } else if (userIdea.toLowerCase().match(/react|app|web/)) {
+                details = `\nSPECIFIC MODULE INSTRUCTIONS:
+- Implement clean functional components with React.useState and React.useEffect.
+- Keep state management structured, clean, and memoized using React.useMemo where appropriate.
+- Ensure the layout is responsive, mobile-first, and fully accessible with ARIA labels.`;
+            } else if (userIdea.toLowerCase().match(/sql|database/)) {
+                details = `\nSPECIFIC MODULE INSTRUCTIONS:
+- Include proper index suggestions to optimize the query execution path.
+- Avoid nested subqueries in SELECT clauses; use JOINs or Common Table Expressions (CTEs) for efficiency.
+- Provide a brief breakdown of the query execution plan.`;
+            }
 
-TECHNICAL REQUIREMENTS & CODE SPECIFICATION:
-1. CODE QUALITY: Write clean, modular, and well-commented code following industry best practices.
-2. ARCHITECTURE: Include robust exception handling, edge-case checks, and optimal time/space complexity.
-3. EXPLANATION: Include a brief technical walkthrough detailing key functions, dependencies, and setup steps.
-${addExamples.checked ? "4. DEMO CODE: Provide a complete, runnable code sample that can be tested immediately.\n" : ""}${addNoFluff.checked ? "5. CONCISENESS: Skip conversational greetings. Start directly with the code solution.\n" : ""}
-Let's build this step-by-step using clean code standards.`;
+            promptText = `You are a Principal Software Architect. Write a production-grade, highly efficient solution in ${language} for: "${userIdea}".
+${details}
+CODE REQUIREMENTS:
+1. Maintain strict modularity, naming variables descriptively.
+2. Include try-except exception blocks for all network operations, file I/O, or parsing gates.
+3. Write clean, readable code with comprehensive inline documentation.
+4. Output a single copy-pasteable script including a mock runnable test case. Avoid conversational fluff before the code block.`;
         } 
         else if (activeIntent === "business") {
-            promptText = `[EXPERT ROLE: EXECUTIVE COMMUNICATIONS & STRATEGY CONSULTANT]
+            const isEmail = userIdea.toLowerCase().match(/email|outreach|message/);
+            if (isEmail) {
+                promptText = `You are an expert Copywriter and Talent Consultant. Write a high-converting cold outreach email targeting a recruiter/hiring manager based on this goal: "${userIdea}".
 
-COMMUNICATION MISSION:
-Formulate a high-impact, persuasive deliverable for the following request:
-"${userIdea}"
+STRUCTURE THE EMAIL ACCORDING TO THESE CONSTRAINTS:
+1. Subject Lines: Generate 3 attention-grabbing, short subject lines (< 6 words) optimized for a high open rate.
+2. The Hook: Open with a customized value statement within the first 2 sentences. Skip generic fluff like "Hope this email finds you well."
+3. Body Layout: Bullet point 2-3 quantifiable achievements (e.g. "Optimized DB queries by 40%").
+4. Call to Action: End with a low-friction, single call-to-action (e.g. "Do you have 10 minutes next Thursday for a brief chat?").
+5. Length: Keep the total email length under 150 words.`;
+            } else {
+                promptText = `You are an Executive Business Strategist. Formulate a professional deliverable for the following request: "${userIdea}".
 
-STRATEGIC BLUEPRINT & STRUCTURE:
-1. SUBJECT LINE / HEADING: Provide 3 high-converting title or subject line options.
-2. HOOK & VALUE PROP: Begin with a compelling opening statement establishing immediate value.
-3. CONCISENESS: Keep the body text concise, action-focused, and free of unnecessary fluff.
-4. CALL-TO-ACTION (CTA): Conclude with a clear, friction-free next step for the reader.
-${addFormatting.checked ? "5. LAYOUT: Format with clean headers, bold key phrases, and bullet points.\n" : ""}
-Let's draft this professional response step-by-step.`;
+STRUCTURE THE OUTPUT ACCORDING TO THESE CONSTRAINTS:
+1. Executive Summary: Provide a 3-sentence high-level overview.
+2. Core Methodology: Provide a step-by-step action plan mapping out key milestones.
+3. KPIs & Metrics: Explicitly state 3 key performance metrics to track progress.
+4. Risk Management: Identify 2 potential risks and outline mitigation strategies.`;
+            }
         }
         else if (activeIntent === "learning") {
-            promptText = `[PEDAGOGICAL ROLE: FIRST-PRINCIPLES EDUCATOR & CONCEPT ANALYST]
+            promptText = `You are an expert Pedagogue and First-Principles Educator. Explain the following concept clearly: "${userIdea}".
 
-TEACHING GOAL:
-Create a comprehensive, easy-to-understand breakdown for:
-"${userIdea}"
-
-MASTERCLASS STRUCTURE:
-1. THE BIG PICTURE: Explain the core baseline concept in 2-3 simple, jargon-free sentences.
-2. MENTAL MODEL & METAPHOR: Map the concept onto a relatable everyday analogy or real-world process.
-3. CORE MECHANICS: Explain the top 3 key sub-components or underlying mechanisms.
-4. COMMON MISCONCEPTIONS: Highlight 2 common misunderstandings people have about this topic and clarify why they are wrong.
-${addStepByStep.checked ? "5. CHECKPOINT: End with a 2-question self-check quiz to test comprehension.\n" : ""}
-Let's break down this concept step-by-step.`;
+EXPLAIN ACCORDING TO THIS PEDAGOGICAL BREAKDOWN:
+1. The 10-Year-Old Explanation: Define the baseline concept simply in 2 sentences using plain language with zero jargon.
+2. The Analogical Metaphor: Map the core mechanisms of "${userIdea}" directly onto a familiar everyday object or scenario (e.g., a factory, plumbing system, or cooking recipe).
+3. Technical Core: Break down the top 3 critical terms or mathematical mechanisms.
+4. Misconceptions: Address 2 common misunderstandings people make when learning this topic.
+5. Verification: End with a 2-question self-check quiz to test the reader's comprehension.`;
         }
         else {
-            promptText = `[MASTER ROLE: SENIOR SUBJECT MATTER EXPERT & STRATEGIST]
+            promptText = `You are a Senior Subject Matter Expert. Provide a comprehensive, structured response addressing the following request: "${userIdea}".
 
-TASK OVERVIEW:
-Provide an authoritative, detailed, and structured response addressing:
-"${userIdea}"
-
-DELIVERABLE FRAMEWORK:
-1. EXECUTIVE SUMMARY: Provide a high-level summary of the core solution.
-2. ACTIONABLE STEPS: Detail a step-by-step methodology covering all primary milestones.
-${addExamples.checked ? "3. PRACTICAL EXAMPLES: Include 2-3 real-world scenarios illustrating the solution.\n" : ""}${addNoFluff.checked ? "4. DIRECT OUTPUT: Eliminate conversational filler. Begin directly with Section 1.\n" : ""}
-${addFormatting.checked ? "Format with clean Markdown headers, bold terms, and structured bullet points." : ""} Let me know if you need any adjustments.`;
+DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
+1. Core Breakdown: Provide a concise executive overview of the solution.
+2. Technical Roadmap: Detail a step-by-step implementation guide covering all prerequisites.
+3. Practical Application: Highlight 2 concrete examples of how this is applied in industry.
+4. Format: Use clean markdown headers, bold terms, and structured list items. Avoid conversational greetings and start directly with the analysis.`;
         }
 
         promptOutput.value = promptText;
         updateStats();
+        addConsoleLog(`Prompt compiled successfully. Ready to copy.`, false);
         addToHistoryDebounced(userIdea, selectedDomain);
     }
 
     // -------------------------------------------------------------
-    // 6. Statistics Engine
+    // 7. Statistics Engine
     // -------------------------------------------------------------
     function updateStats() {
         const text = promptOutput.value;
@@ -454,7 +502,7 @@ ${addFormatting.checked ? "Format with clean Markdown headers, bold terms, and s
     }
 
     // -------------------------------------------------------------
-    // 7. Persistence Operations (LocalStorage)
+    // 8. Persistence Operations (LocalStorage)
     // -------------------------------------------------------------
     saveLibraryBtn.addEventListener("click", () => {
         const idea = conceptInput.value.trim();
@@ -480,6 +528,7 @@ ${addFormatting.checked ? "Format with clean Markdown headers, bold terms, and s
         
         loadSidebarData();
         showToast("Saved to library!");
+        addConsoleLog(`Saved prompt stored in library: "${label}"`);
     });
 
     let historyTimeout;
@@ -501,11 +550,11 @@ ${addFormatting.checked ? "Format with clean Markdown headers, bold terms, and s
             };
 
             historyItems.unshift(historyItem);
-            if (historyItems.length > 20) historyItems.pop();
+            if (historyItems.length > 10) historyItems.pop();
             
             setLocalStorageData(LOCAL_HISTORY_KEY, historyItems);
             loadSidebarData();
-        }, 1200);
+        }, 1500);
     }
 
     function loadSidebarData() {
@@ -516,14 +565,14 @@ ${addFormatting.checked ? "Format with clean Markdown headers, bold terms, and s
 
         savedList.innerHTML = "";
         if (saved.length === 0) {
-            savedList.innerHTML = `<div class="empty-state">No saved prompts yet. Click "Save" to store a prompt.</div>`;
+            savedList.innerHTML = `<div class="empty-state">No saved prompts yet.</div>`;
         } else {
             savedList.innerHTML = saved.map(item => `
                 <div class="sidebar-item" data-id="${item.id}">
                     <div class="sidebar-item-header">
                         <div class="sidebar-item-title">${escapeHTML(item.label)}</div>
                         <button class="sidebar-item-delete" data-id="${item.id}" title="Delete Saved Prompt">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
                     </div>
                     <div class="sidebar-item-meta">
@@ -548,12 +597,12 @@ ${addFormatting.checked ? "Format with clean Markdown headers, bold terms, and s
 
         historyList.innerHTML = "";
         if (history.length === 0) {
-            historyList.innerHTML = `<div class="empty-state">Your recent generations will appear here.</div>`;
+            historyList.innerHTML = `<div class="empty-state">No recent history.</div>`;
         } else {
             historyList.innerHTML = history.map(item => `
                 <div class="sidebar-item" data-id="${item.id}">
                     <div class="sidebar-item-header">
-                        <div class="sidebar-item-title" style="font-weight: 500;">"${escapeHTML(item.idea.substring(0, 35))}..."</div>
+                        <div class="sidebar-item-title" style="font-weight: 500;">"${escapeHTML(item.idea.substring(0, 32))}..."</div>
                     </div>
                     <div class="sidebar-item-meta">
                         <span>${item.date}</span>
@@ -576,6 +625,7 @@ ${addFormatting.checked ? "Format with clean Markdown headers, bold terms, and s
         updateClearBtnVisibility();
         promptOutput.value = item.prompt;
         updateStats();
+        addConsoleLog(`Loaded prompt from library: "${item.idea.substring(0, 20)}..."`);
         showToast("Saved prompt loaded!");
     }
 
@@ -617,18 +667,31 @@ ${addFormatting.checked ? "Format with clean Markdown headers, bold terms, and s
     }
 
     // -------------------------------------------------------------
-    // 8. Event Bindings & Utilities
+    // 9. Event Bindings & Utilities
     // -------------------------------------------------------------
     function setupEventListeners() {
         toggleSidebarBtn.addEventListener("click", () => {
             sidebar.classList.toggle("collapsed");
         });
 
+        // Typing event with debounce
+        let typingTimeout;
         conceptInput.addEventListener("input", () => {
             updateClearBtnVisibility();
-            // Process spelling correction on input
-            processSpellingCorrection();
-            generateMasterPrompt();
+            
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                processSpellingCorrection();
+                generateMasterPrompt();
+            }, 800);
+        });
+
+        // Autocorrect immediately on pressing space or enter
+        conceptInput.addEventListener("keydown", (e) => {
+            if (e.key === " " || e.key === "Enter") {
+                processSpellingCorrection();
+                generateMasterPrompt();
+            }
         });
 
         clearInputBtn.addEventListener("click", () => {
@@ -638,16 +701,12 @@ ${addFormatting.checked ? "Format with clean Markdown headers, bold terms, and s
             updateClearBtnVisibility();
             generateMasterPrompt();
             conceptInput.focus();
+            addConsoleLog("Input cleared.");
         });
 
         domainRadios.forEach(radio => {
             radio.addEventListener("change", generateMasterPrompt);
         });
-
-        addStepByStep.addEventListener("change", generateMasterPrompt);
-        addExamples.addEventListener("change", generateMasterPrompt);
-        addNoFluff.addEventListener("change", generateMasterPrompt);
-        addFormatting.addEventListener("change", generateMasterPrompt);
 
         copyBtn.addEventListener("click", copyPrompt);
         resetBtn.addEventListener("click", resetForm);
@@ -658,7 +717,8 @@ ${addFormatting.checked ? "Format with clean Markdown headers, bold terms, and s
         if (!conceptInput.value.trim() && !textToCopy) return;
 
         navigator.clipboard.writeText(textToCopy).then(() => {
-            showToast("Copied Master Prompt to clipboard!");
+            showToast("Copied to clipboard!");
+            addConsoleLog("Prompt copied to clipboard successfully.");
         }).catch(err => {
             console.error("Failed to copy text: ", err);
             promptOutput.select();
@@ -689,17 +749,13 @@ ${addFormatting.checked ? "Format with clean Markdown headers, bold terms, and s
             radio.checked = idx === 0;
         });
 
-        addStepByStep.checked = true;
-        addExamples.checked = true;
-        addNoFluff.checked = true;
-        addFormatting.checked = true;
-
         updateClearBtnVisibility();
         generateMasterPrompt();
+        addConsoleLog("Form reset.");
     }
 
     // -------------------------------------------------------------
-    // 9. Technical AI Neural Data-Flow Background Canvas
+    // 10. Technical AI Neural Data-Flow Background Canvas
     // -------------------------------------------------------------
     function initBgAnimation() {
         const canvas = document.getElementById("bg-canvas");

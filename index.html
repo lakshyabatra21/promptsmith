@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Promptsmith - Next-generation, spelling-corrected ChatGPT Master Prompt Builder.">
-    <title>Promptsmith — Next-Gen AI Prompt Engine</title>
+    <title>Promptsmith — Premium AI Prompt Engine</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,42 +18,30 @@
         <div class="header-container">
             <div class="logo">
                 <div class="logo-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                     </svg>
                 </div>
                 <span>Promptsmith</span>
-                <span class="trust-badge">AUTO-SPELL CHECK</span>
+                <span class="trust-badge">CONVERSATIONAL ENGINE</span>
             </div>
             
             <div class="header-actions">
                 <button id="toggle-sidebar-btn" class="header-btn" title="Saved Prompts">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
                     <span>Library</span>
                 </button>
                 <a href="https://chatgpt.com" target="_blank" rel="noopener" class="chatgpt-btn">
-                    <span>Open ChatGPT</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                    <span>Use ChatGPT</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
                 </a>
             </div>
         </div>
     </header>
 
-    <!-- HERO INTRO BANNER -->
-    <section class="hero-banner">
-        <h1>Optimize Plain Text Into <span class="gradient-text">Master ChatGPT Prompts</span></h1>
-        <p>Type or speak your idea. Promptsmith automatically corrects typos and structures the prompt for flawless ChatGPT responses.</p>
-        
-        <div class="trust-pills">
-            <span class="pill">🔍 Live Spelling Auto-Correct</span>
-            <span class="pill">🎙️ Live Audio Wave Visualizer</span>
-            <span class="pill">🔒 Runs 100% Client-Side</span>
-        </div>
-    </section>
-
     <main class="app-layout">
         <!-- SIDEBAR: SAVED PROMPTS -->
-        <aside id="sidebar" class="sidebar">
+        <aside id="sidebar" class="sidebar collapsed">
             <div class="sidebar-header">
                 <h3>Saved Library</h3>
             </div>
@@ -79,207 +67,135 @@
             </div>
         </aside>
 
-        <!-- MAIN GENERATOR CONTAINER -->
-        <div class="app-container">
-            <!-- LEFT CARD: INPUT & AUTO-CORRECT -->
-            <section class="card border-glowing">
-                <div class="card-header">
-                    <div class="step-badge">STEP 1</div>
-                    <h2>Describe your idea or request</h2>
+        <!-- MAIN DASHBOARD LAYOUT -->
+        <div class="dashboard-grid">
+            
+            <!-- LEFT WORKSPACE: INPUT & AI SENSORS -->
+            <section class="card border-glowing workspace-card">
+                <div class="workspace-header">
+                    <span class="tech-indicator">INPUT CONSOLE</span>
+                    <h2>What do you want ChatGPT to do?</h2>
+                    <p class="helper-text">Type your idea naturally or dictate. The engine will correct spelling mistakes and expand it into a custom prompt.</p>
                 </div>
 
                 <div class="input-section">
-                    <div class="input-group">
-                        <div class="concept-input-container">
-                            <textarea id="concept-input" class="idea-textarea" placeholder="Type or click microphone to speak (e.g., Write a cold email for a dev job, or explain quantume computing simply...)" rows="4"></textarea>
-                            
-                            <!-- Input Control Buttons -->
-                            <div class="input-controls">
-                                <!-- Voice Dictation Mic Button -->
-                                <button id="mic-btn" class="icon-btn mic-btn" title="Voice Dictation (Speak your idea)">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                                        <line x1="12" y1="19" x2="12" y2="23"></line>
-                                        <line x1="8" y1="23" x2="16" y2="23"></line>
-                                    </svg>
-                                </button>
-                                <!-- Clear Text Button -->
-                                <button id="clear-input-btn" class="icon-btn clear-btn" title="Clear text">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Real-time Spelling Auto-correct Banner -->
-                        <div id="autocorrect-banner" class="autocorrect-status" style="display:none;">
-                            <span class="check-icon">✓</span>
-                            <span id="autocorrect-text">Spelling Auto-Corrected: quantume -> quantum</span>
-                        </div>
-
-                        <!-- Voice Waveform Canvas Visualizer (Pulsing during listening) -->
-                        <div id="listening-container" class="listening-status" style="display:none; flex-direction:column; gap:0.5rem;">
-                            <div class="listening-text-row">
-                                <span class="recording-pulse"></span>
-                                <span>Listening... Speak clearly</span>
-                            </div>
-                            <canvas id="voice-wave-canvas" class="voice-wave-canvas" width="300" height="40"></canvas>
+                    <div class="concept-input-container">
+                        <textarea id="concept-input" class="idea-textarea" placeholder="Describe your request (e.g. Write a python web scraper, explain quantume physics simply, or write a cold outreach email to a tech recruter...)"></textarea>
+                        
+                        <!-- Floating Mic & Clear Controls -->
+                        <div class="input-controls">
+                            <button id="mic-btn" class="icon-btn mic-btn" title="Voice Dictation">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                                </svg>
+                            </button>
+                            <button id="clear-input-btn" class="icon-btn clear-btn" title="Clear text">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
                         </div>
                     </div>
 
-                    <!-- STEP 2: Goal Selector -->
-                    <div class="card-header" style="margin-top: 0.25rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.06);">
-                        <div class="step-badge">STEP 2</div>
-                        <h2>Choose Goal Category & Structure</h2>
+                    <!-- Spelling Corrections Indicator Pill -->
+                    <div id="autocorrect-banner" class="autocorrect-status" style="display:none;">
+                        <span class="check-icon">✓</span>
+                        <span id="autocorrect-text">No typos detected</span>
                     </div>
 
-                    <div class="option-grid">
-                        <label class="option-card">
-                            <input type="radio" name="domain" value="general" checked>
-                            <div class="option-content">
-                                <span class="option-icon">💡</span>
-                                <div>
-                                    <strong>General Task</strong>
-                                    <small>Standard request structure</small>
-                                </div>
-                            </div>
-                        </label>
-                        <label class="option-card">
-                            <input type="radio" name="domain" value="photo">
-                            <div class="option-content">
-                                <span class="option-icon">📷</span>
-                                <div>
-                                    <strong>Photo & Image AI</strong>
-                                    <small>Midjourney / DALL-E prompts</small>
-                                </div>
-                            </div>
-                        </label>
-                        <label class="option-card">
-                            <input type="radio" name="domain" value="business">
-                            <div class="option-content">
-                                <span class="option-icon">💼</span>
-                                <div>
-                                    <strong>Job & Email</strong>
-                                    <small>Cover letters, emails, resumes</small>
-                                </div>
-                            </div>
-                        </label>
-                        <label class="option-card">
-                            <input type="radio" name="domain" value="coding">
-                            <div class="option-content">
-                                <span class="option-icon">💻</span>
-                                <div>
-                                    <strong>Coding & Tech</strong>
-                                    <small>Modular scripts, architecture</small>
-                                </div>
-                            </div>
-                        </label>
-                        <label class="option-card">
-                            <input type="radio" name="domain" value="learning">
-                            <div class="option-content">
-                                <span class="option-icon">📚</span>
-                                <div>
-                                    <strong>Study & Explain</strong>
-                                    <small>Analogies, quizzes, roadmaps</small>
-                                </div>
-                            </div>
-                        </label>
+                    <!-- Waveform Animation Canvas visualizer -->
+                    <div id="listening-container" class="listening-status" style="display:none;">
+                        <div class="listening-text-row">
+                            <span class="recording-pulse"></span>
+                            <span>Listening... Speak clearly</span>
+                        </div>
+                        <canvas id="voice-wave-canvas" class="voice-wave-canvas" width="300" height="40"></canvas>
                     </div>
 
-                    <!-- Prompt Enhancers -->
-                    <div class="input-group" style="margin-top: 0.25rem;">
-                        <label class="label-title">Core Prompt Rules</label>
-                        <div class="checkbox-grid">
-                            <label class="custom-checkbox">
-                                <input type="checkbox" id="add-step-by-step" checked>
-                                <span>Require Step-by-Step Logic</span>
+                    <!-- Category Preset Row (Simple Filter pills) -->
+                    <div class="category-selector-row">
+                        <span class="selector-title">Intent Override:</span>
+                        <div class="selector-pills">
+                            <label class="pill-radio">
+                                <input type="radio" name="domain" value="general" checked>
+                                <span class="pill-btn">💡 Auto-Detect</span>
                             </label>
-                            <label class="custom-checkbox">
-                                <input type="checkbox" id="add-examples" checked>
-                                <span>Include Real-World Examples</span>
+                            <label class="pill-radio">
+                                <input type="radio" name="domain" value="coding">
+                                <span class="pill-btn">💻 Code & Tech</span>
                             </label>
-                            <label class="custom-checkbox">
-                                <input type="checkbox" id="add-no-fluff" checked>
-                                <span>No Conversational Fluff</span>
+                            <label class="pill-radio">
+                                <input type="radio" name="domain" value="business">
+                                <span class="pill-btn">💼 Career & Business</span>
                             </label>
-                            <label class="custom-checkbox">
-                                <input type="checkbox" id="add-formatting" checked>
-                                <span>Clean Markdown Bolding & Headers</span>
+                            <label class="pill-radio">
+                                <input type="radio" name="domain" value="photo">
+                                <span class="pill-btn">📷 Photo & Image AI</span>
+                            </label>
+                            <label class="pill-radio">
+                                <input type="radio" name="domain" value="learning">
+                                <span class="pill-btn">📚 Concept Explain</span>
                             </label>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- RIGHT CARD: MASTER PROMPT OUTPUT -->
-            <section class="card output-card border-glowing">
-                <div class="card-header">
-                    <div class="step-badge step-success">STEP 3</div>
+            <!-- RIGHT WORKSPACE: OPTIMIZER HUD & GENERATION -->
+            <section class="card border-glowing output-card">
+                <div class="workspace-header">
+                    <span class="tech-indicator indicator-success">GENERATION CONSOLE</span>
                     <h2>Optimized Master Prompt</h2>
                 </div>
 
                 <div class="preview-container">
-                    <textarea id="prompt-output" class="prompt-textarea" placeholder="Your master prompt will appear here ready to copy..."></textarea>
+                    <textarea id="prompt-output" class="prompt-textarea" placeholder="Your context-expanded prompt will generate here..." readonly></textarea>
                 </div>
 
-                <!-- Stats bar -->
-                <div class="stats-bar">
-                    <div class="stat-item">
-                        <span class="stat-label">Estimated Tokens</span>
-                        <span id="stat-tokens" class="stat-value">0</span>
+                <!-- Holographic Pipeline Logs Console -->
+                <div class="pipeline-console">
+                    <div class="console-header">
+                        <span class="blink-dot"></span>
+                        <span class="console-title">PROMPTSMITH PIPELINE MONITOR</span>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Word Count</span>
-                        <span id="stat-words" class="stat-value">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Optimization Grade</span>
-                        <span id="stat-quality" class="stat-value text-glow">99.4% Optimized</span>
+                    <div id="console-logs" class="console-logs">
+                        <div class="log-line text-muted">&gt; Ready for input...</div>
                     </div>
                 </div>
 
-                <div class="action-bar">
-                    <button id="copy-btn" class="btn btn-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                        <span>Copy Master Prompt</span>
-                    </button>
-                    <button id="save-library-btn" class="btn btn-secondary" title="Save Prompt to Library">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-                        <span>Save</span>
-                    </button>
-                    <button id="reset-btn" class="btn btn-secondary">Reset</button>
+                <!-- Action Toolbar -->
+                <div class="action-bar-row">
+                    <div class="stats-mini">
+                        <div class="mini-stat">Words: <strong id="stat-words">0</strong></div>
+                        <div class="mini-stat">Est. Tokens: <strong id="stat-tokens">0</strong></div>
+                    </div>
+                    
+                    <div class="actions-group">
+                        <button id="copy-btn" class="btn btn-primary" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            <span>Copy Prompt</span>
+                        </button>
+                        <button id="save-library-btn" class="btn btn-secondary" title="Save Prompt" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                        </button>
+                        <button id="reset-btn" class="btn btn-secondary" title="Reset UI">Reset</button>
+                    </div>
                 </div>
             </section>
         </div>
     </main>
 
-    <!-- EXAMPLES SECTION -->
-    <section class="presets-container">
-        <h3>Try These Sample Prompts</h3>
-        <div id="presets-grid" class="presets-grid">
-            <!-- Loaded by JS -->
-        </div>
-    </section>
-
-    <!-- TRUST FOOTER -->
-    <section class="trust-features">
-        <div class="feature-item">
-            <div class="feature-icon">🔍</div>
-            <h4>Spelling Auto-Correction</h4>
-            <p>Built-in dictionary automatically patches technical spelling mistakes as you type so prompts are generated correctly.</p>
-        </div>
-        <div class="feature-item">
-            <div class="feature-icon">🎙️</div>
-            <h4>Live Voice Dictation</h4>
-            <p>Dictate prompts hands-free with an animated visualizer monitoring sound frequencies in real-time.</p>
-        </div>
-        <div class="feature-item">
-            <div class="feature-icon">⚡</div>
-            <h4>Ready-Made Templates</h4>
-            <p>Pick a goal category. The engine automatically adapts code parameters, camera specifications, or business hooks.</p>
+    <!-- PRESETS ROW -->
+    <section class="presets-section">
+        <div class="presets-container-fluid">
+            <h3>Quick Start Templates</h3>
+            <div id="presets-grid" class="presets-grid-row">
+                <!-- Loaded by JS -->
+            </div>
         </div>
     </section>
 
