@@ -1,4 +1,4 @@
-// Promptsmith - High-Trust Next-Gen Prompt Expansion Engine
+// Promptsmith - High-Trust Next-Gen Hybrid AI Prompt Expansion Engine
 
 document.addEventListener("DOMContentLoaded", () => {
     // UI Elements
@@ -10,7 +10,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const autocorrectBanner = document.getElementById("autocorrect-banner");
     const autocorrectText = document.getElementById("autocorrect-text");
     const consoleLogs = document.getElementById("console-logs");
+    const liveModeBadge = document.getElementById("live-mode-badge");
     
+    // Settings Modal elements
+    const settingsModal = document.getElementById("settings-modal");
+    const openSettingsBtn = document.getElementById("open-settings-btn");
+    const closeSettingsBtn = document.getElementById("close-settings-btn");
+    const saveSettingsBtn = document.getElementById("save-settings-btn");
+    const apiProviderSelect = document.getElementById("api-provider");
+    const apiKeyInput = document.getElementById("api-key-input");
+    const apiKeyFieldContainer = document.getElementById("api-key-field-container");
+
     // Output & Buttons
     const promptOutput = document.getElementById("prompt-output");
     const copyBtn = document.getElementById("copy-btn");
@@ -37,10 +47,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let recognition = null;
     let isListening = false;
     let waveId = null;
+    let apiAbortController = null;
 
     // LocalStorage keys
     const LOCAL_SAVED_KEY = "promptsmith_saved_prompts";
     const LOCAL_HISTORY_KEY = "promptsmith_history_prompts";
+    const LOCAL_PROVIDER_KEY = "promptsmith_api_provider";
+    const LOCAL_KEY_KEY = "promptsmith_api_secret_key";
 
     // Typo Dictionary
     const typoDict = {
@@ -101,10 +114,12 @@ document.addEventListener("DOMContentLoaded", () => {
     function init() {
         renderSampleIdeas();
         loadSidebarData();
+        loadSettings();
         setupEventListeners();
         setupVoiceDictation();
         resetForm();
         initBgAnimation();
+        updateBadgeState();
         addConsoleLog("Promptsmith kernel loaded successfully.", true);
         addConsoleLog("Auto-spelling system standby.", true);
     }
@@ -282,7 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         updateClearBtnVisibility();
         addConsoleLog(`Preset loaded: "${item.title}"`);
-        processSpellingCorrection(true); // force autocorrect immediately for presets
+        processSpellingCorrection(true);
         generateMasterPrompt();
         showToast("Sample prompt loaded!");
     }
@@ -301,7 +316,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const selectionStart = conceptInput.selectionStart;
         const selectionEnd = conceptInput.selectionEnd;
 
-        // Tokenize words, check against autocorrect dictionary
         const words = text.split(/\s+/);
         let correctedWords = [];
         let correctedCount = 0;
@@ -329,8 +343,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (correctedCount > 0) {
             conceptInput.value = correctedWords.join(" ");
-            
-            // Restore selection caret index so typing is not interrupted
             conceptInput.setSelectionRange(selectionStart, selectionEnd);
 
             autocorrectText.textContent = `Auto-corrected: ${correctionList.join(", ")}`;
@@ -345,49 +357,148 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // -------------------------------------------------------------
-    // 6. Deep Context Prompt Expansion Parser (On-spot accurate generation)
+    // 6. Settings Modal Handling & Badges
     // -------------------------------------------------------------
-    function detectIntent(userSentence) {
-        const text = userSentence.toLowerCase();
+    function loadSettings() {
+        const savedProvider = localStorage.getItem(LOCAL_PROVIDER_KEY) || "none";
+        const savedKey = localStorage.getItem(LOCAL_KEY_KEY) || "";
 
-        if (text.match(/photo|image|picture|edit|photograph|portrait|camera|lighting|midjourney|dall-e|photoshop|background|background removal|render|8k|lens|aspect ratio/)) {
-            return "photo";
-        }
-        if (text.match(/code|python|javascript|react|html|css|sql|script|build|develop|bug|api|database|algorithm|function|scrape|web|app|debug|fix|program/)) {
-            return "coding";
-        }
-        if (text.match(/email|job|resume|cover letter|recruiter|interview|business|sales|pitch|marketing|client|strategy|manager|career|post|linkedin/)) {
-            return "business";
-        }
-        if (text.match(/explain|teach|understand|analogy|concept|math|physics|science|history|learn|study|roadmap|summary|difference|how does|why/)) {
-            return "learning";
-        }
-        return "general";
+        apiProviderSelect.value = savedProvider;
+        apiKeyInput.value = savedKey;
+
+        toggleApiKeyField();
     }
 
-    function generateMasterPrompt() {
-        const userIdea = conceptInput.value.trim();
-        if (!userIdea) {
-            promptOutput.value = "";
-            copyBtn.disabled = true;
-            saveLibraryBtn.disabled = true;
-            updateStats();
-            return;
+    function toggleApiKeyField() {
+        const val = apiProviderSelect.value;
+        if (val === "none") {
+            apiKeyFieldContainer.style.display = "none";
+        } else {
+            apiKeyFieldContainer.style.display = "flex";
+            if (val === "gemini") {
+                apiKeyInput.placeholder = "Paste your Google Gemini API Key...";
+            } else {
+                apiKeyInput.placeholder = "Paste your OpenAI API Key (sk-...)...";
+            }
         }
-        copyBtn.disabled = false;
-        saveLibraryBtn.disabled = false;
+    }
 
-        const selectedDomain = document.querySelector('input[name="domain"]:checked').value;
-        const activeIntent = (selectedDomain === "general") ? detectIntent(userIdea) : selectedDomain;
+    function updateBadgeState() {
+        const provider = localStorage.getItem(LOCAL_PROVIDER_KEY) || "none";
+        const apiKey = localStorage.getItem(LOCAL_KEY_KEY) || "";
 
-        addConsoleLog(`Intent identified: ${activeIntent.toUpperCase()}`);
-        addConsoleLog(`Building on-spot context mapping...`);
+        if (provider !== "none" && apiKey.trim() !== "") {
+            liveModeBadge.textContent = `LIVE ${provider.toUpperCase()} AI`;
+            liveModeBadge.className = "mode-badge badge-live";
+        } else {
+            liveModeBadge.textContent = "LOCAL ENGINE";
+            liveModeBadge.className = "mode-badge badge-local";
+        }
+    }
 
+    // -------------------------------------------------------------
+    // 7. Live API Call Pipelines (Gemini & OpenAI)
+    // -------------------------------------------------------------
+    async function runLiveAIGenerator(userIdea, activeIntent, provider, apiKey) {
+        // Cancel any pending fetch requests
+        if (apiAbortController) {
+            apiAbortController.abort();
+        }
+        apiAbortController = new AbortController();
+
+        addConsoleLog(`Connecting to ${provider.toUpperCase()} API endpoint...`);
+        promptOutput.value = "Generative stream connecting... Please wait...";
+        promptOutput.style.opacity = "0.6";
+
+        let systemInstruction = `You are a world-class prompt engineer. Your goal is to transform the user's raw idea into an extremely powerful, detailed, and context-expanded ChatGPT prompt.
+Do NOT reply to the user's request. Do NOT write code or write the final output. Write ONLY the engineered prompt instructions.
+Include a relevant expert role, technical boundaries, clear formatting instructions, and quality checkpoints custom-tailored to this exact idea: "${userIdea}".
+Make sure the instructions are highly specific to the domain: ${activeIntent.toUpperCase()}.`;
+
+        try {
+            if (provider === "gemini") {
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: systemInstruction }]
+                        }]
+                    }),
+                    signal: apiAbortController.signal
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Gemini status code: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    promptOutput.value = data.candidates[0].content.parts[0].text.trim();
+                } else {
+                    throw new Error("Empty candidate tokens returned.");
+                }
+            } 
+            else if (provider === "openai") {
+                const endpoint = `https://api.openai.com/v1/chat/completions`;
+                
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-4o-mini",
+                        messages: [
+                            { role: "system", content: "You are a professional prompt builder." },
+                            { role: "user", content: systemInstruction }
+                        ],
+                        temperature: 0.7
+                    }),
+                    signal: apiAbortController.signal
+                });
+
+                if (!response.ok) {
+                    throw new Error(`OpenAI status code: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.choices && data.choices[0].message.content) {
+                    promptOutput.value = data.choices[0].message.content.trim();
+                } else {
+                    throw new Error("Empty OpenAI choice payload.");
+                }
+            }
+
+            promptOutput.style.opacity = "1";
+            addConsoleLog(`Live prompt optimization complete!`, false);
+            updateStats();
+            addToHistoryDebounced(userIdea, activeIntent);
+
+        } catch (err) {
+            if (err.name === "AbortError") {
+                addConsoleLog("API request aborted.");
+                return;
+            }
+            console.error("Live API Error:", err);
+            addConsoleLog(`[API ERROR] ${err.message}. Reverting to local engine.`, true);
+            promptOutput.style.opacity = "1";
+            
+            // Graceful Fallback to Local Engine
+            generateLocalTemplate(userIdea, activeIntent);
+        }
+    }
+
+    // -------------------------------------------------------------
+    // 8. Offline Local Prompt Templates Generator
+    // -------------------------------------------------------------
+    function generateLocalTemplate(userIdea, activeIntent) {
         let promptText = "";
 
-        // Custom Context Expansion Logic
         if (activeIntent === "photo") {
-            // Is it photo editing or image generation?
             const isEditing = userIdea.toLowerCase().match(/edit|change|remove|replace|modify/);
             if (isEditing) {
                 promptText = `You are a high-end Digital Retoucher and Photoshop AI Specialist. Your task is to modify a photo according to these specific edits: "${userIdea}".
@@ -406,7 +517,6 @@ Generate the prompt using this exact structure:
             }
         }
         else if (activeIntent === "coding") {
-            // Check specific languages or frameworks
             let language = "modern code";
             if (userIdea.toLowerCase().match(/python/)) language = "Python 3.11+";
             else if (userIdea.toLowerCase().match(/javascript|js/)) language = "modern ES6+ JavaScript";
@@ -484,12 +594,42 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
 
         promptOutput.value = promptText;
         updateStats();
-        addConsoleLog(`Prompt compiled successfully. Ready to copy.`, false);
-        addToHistoryDebounced(userIdea, selectedDomain);
+        addConsoleLog(`Local compilation complete.`);
+        addToHistoryDebounced(userIdea, activeIntent);
     }
 
     // -------------------------------------------------------------
-    // 7. Statistics Engine
+    // Main Orchestrator
+    // -------------------------------------------------------------
+    function generateMasterPrompt() {
+        const userIdea = conceptInput.value.trim();
+        if (!userIdea) {
+            promptOutput.value = "";
+            copyBtn.disabled = true;
+            saveLibraryBtn.disabled = true;
+            updateStats();
+            return;
+        }
+        copyBtn.disabled = false;
+        saveLibraryBtn.disabled = false;
+
+        const selectedDomain = document.querySelector('input[name="domain"]:checked').value;
+        const activeIntent = (selectedDomain === "general") ? detectIntent(userIdea) : selectedDomain;
+
+        const provider = localStorage.getItem(LOCAL_PROVIDER_KEY) || "none";
+        const apiKey = localStorage.getItem(LOCAL_KEY_KEY) || "";
+
+        if (provider !== "none" && apiKey.trim() !== "") {
+            // Live AI mode
+            runLiveAIGenerator(userIdea, activeIntent, provider, apiKey);
+        } else {
+            // Offline fallback
+            generateLocalTemplate(userIdea, activeIntent);
+        }
+    }
+
+    // -------------------------------------------------------------
+    // 9. Statistics Engine
     // -------------------------------------------------------------
     function updateStats() {
         const text = promptOutput.value;
@@ -502,7 +642,7 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
     }
 
     // -------------------------------------------------------------
-    // 8. Persistence Operations (LocalStorage)
+    // 10. Persistence Operations (LocalStorage)
     // -------------------------------------------------------------
     saveLibraryBtn.addEventListener("click", () => {
         const idea = conceptInput.value.trim();
@@ -554,7 +694,7 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
             
             setLocalStorageData(LOCAL_HISTORY_KEY, historyItems);
             loadSidebarData();
-        }, 1500);
+        }, 2000);
     }
 
     function loadSidebarData() {
@@ -667,11 +807,43 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
     }
 
     // -------------------------------------------------------------
-    // 9. Event Bindings & Utilities
+    // 11. Event Bindings & Utilities
     // -------------------------------------------------------------
     function setupEventListeners() {
         toggleSidebarBtn.addEventListener("click", () => {
             sidebar.classList.toggle("collapsed");
+        });
+
+        // Settings Modal controls
+        openSettingsBtn.addEventListener("click", () => {
+            settingsModal.style.display = "flex";
+        });
+
+        closeSettingsBtn.addEventListener("click", () => {
+            settingsModal.style.display = "none";
+        });
+
+        // Modal backdrop click
+        settingsModal.addEventListener("click", (e) => {
+            if (e.target === settingsModal) {
+                settingsModal.style.display = "none";
+            }
+        });
+
+        apiProviderSelect.addEventListener("change", toggleApiKeyField);
+
+        saveSettingsBtn.addEventListener("click", () => {
+            const provider = apiProviderSelect.value;
+            const apiKey = apiKeyInput.value.trim();
+
+            localStorage.setItem(LOCAL_PROVIDER_KEY, provider);
+            localStorage.setItem(LOCAL_KEY_KEY, apiKey);
+
+            settingsModal.style.display = "none";
+            updateBadgeState();
+            addConsoleLog(`API configuration saved. Mode: ${provider.toUpperCase()}`);
+            showToast("Configuration saved!");
+            generateMasterPrompt();
         });
 
         // Typing event with debounce
@@ -686,7 +858,6 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
             }, 800);
         });
 
-        // Autocorrect immediately on pressing space or enter
         conceptInput.addEventListener("keydown", (e) => {
             if (e.key === " " || e.key === "Enter") {
                 processSpellingCorrection();
@@ -695,6 +866,7 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
         });
 
         clearInputBtn.addEventListener("click", () => {
+            if (apiAbortController) apiAbortController.abort();
             conceptInput.value = "";
             stopListening();
             autocorrectBanner.style.display = "none";
@@ -742,6 +914,7 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
     }
 
     function resetForm() {
+        if (apiAbortController) apiAbortController.abort();
         conceptInput.value = "";
         stopListening();
         autocorrectBanner.style.display = "none";
@@ -755,7 +928,7 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
     }
 
     // -------------------------------------------------------------
-    // 10. Technical AI Neural Data-Flow Background Canvas
+    // 12. Technical AI Neural Data-Flow Background Canvas
     // -------------------------------------------------------------
     function initBgAnimation() {
         const canvas = document.getElementById("bg-canvas");
