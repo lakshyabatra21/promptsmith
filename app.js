@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const domainRadios = document.querySelectorAll('input[name="domain"]');
     const autocorrectBanner = document.getElementById("autocorrect-banner");
     const autocorrectText = document.getElementById("autocorrect-text");
-    const consoleLogs = document.getElementById("console-logs");
     const liveModeBadge = document.getElementById("live-mode-badge");
     
     // Settings Modal elements
@@ -120,28 +119,10 @@ document.addEventListener("DOMContentLoaded", () => {
         resetForm();
         initBgAnimation();
         updateBadgeState();
-        addConsoleLog("Promptsmith kernel loaded successfully.", true);
-        addConsoleLog("Auto-spelling system standby.", true);
     }
 
     // -------------------------------------------------------------
-    // 2. Browser console logger simulator
-    // -------------------------------------------------------------
-    function addConsoleLog(message, isMuted = false) {
-        if (!consoleLogs) return;
-        const line = document.createElement("div");
-        line.className = "log-line" + (isMuted ? " text-muted" : "");
-        line.textContent = `> ${message}`;
-        consoleLogs.appendChild(line);
-        consoleLogs.scrollTop = consoleLogs.scrollHeight;
-        
-        while (consoleLogs.children.length > 8) {
-            consoleLogs.removeChild(consoleLogs.firstChild);
-        }
-    }
-
-    // -------------------------------------------------------------
-    // 3. Web Speech API (Voice Dictation Module)
+    // 2. Web Speech API (Voice Dictation Module)
     // -------------------------------------------------------------
     function setupVoiceDictation() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -160,7 +141,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 micBtn.classList.add("active");
                 listeningIndicator.style.display = "flex";
                 showToast("🎙️ Listening... Speak your request!");
-                addConsoleLog("Voice capture stream initialized.");
                 startVoiceWaveAnimation();
             };
 
@@ -184,7 +164,6 @@ document.addEventListener("DOMContentLoaded", () => {
             recognition.onerror = (event) => {
                 console.error("Speech recognition error:", event.error);
                 stopListening();
-                addConsoleLog(`Voice stream error: ${event.error}`, true);
 
                 if (event.error === "not-allowed" || event.error === "service-not-allowed") {
                     alert("Microphone Permission Blocked!\n\nTo enable voice typing:\n1. Click the Lock icon 🔒 in your browser address bar.\n2. Turn ON 'Microphone' permission.\n3. Refresh the page and try again!");
@@ -197,7 +176,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             recognition.onend = () => {
                 stopListening();
-                addConsoleLog("Voice capture stream closed.");
             };
 
             micBtn.addEventListener("click", () => {
@@ -267,7 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // -------------------------------------------------------------
-    // 4. Render Sample Ideas
+    // 3. Render Sample Ideas
     // -------------------------------------------------------------
     function renderSampleIdeas() {
         presetsGrid.innerHTML = "";
@@ -296,14 +274,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         updateClearBtnVisibility();
-        addConsoleLog(`Preset loaded: "${item.title}"`);
         processSpellingCorrection(true);
         generateMasterPrompt();
         showToast("Sample prompt loaded!");
     }
 
     // -------------------------------------------------------------
-    // 5. Debounced Spelling Autocorrect (Preserves Cursor Focus)
+    // 4. Debounced Spelling Autocorrect (Preserves Cursor Focus)
     // -------------------------------------------------------------
     let autocorrectTimeout;
     function processSpellingCorrection(force = false) {
@@ -347,7 +324,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             autocorrectText.textContent = `Auto-corrected: ${correctionList.join(", ")}`;
             autocorrectBanner.style.display = "flex";
-            addConsoleLog(`Spelling patch applied: ${correctionList.join(", ")}`);
 
             clearTimeout(autocorrectTimeout);
             autocorrectTimeout = setTimeout(() => {
@@ -357,7 +333,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // -------------------------------------------------------------
-    // 6. Settings Modal Handling & Badges
+    // 5. Settings Modal Handling & Badges
     // -------------------------------------------------------------
     function loadSettings() {
         const savedProvider = localStorage.getItem(LOCAL_PROVIDER_KEY) || "none";
@@ -397,16 +373,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // -------------------------------------------------------------
-    // 7. Live API Call Pipelines (Gemini & OpenAI)
+    // 6. Live API Call Pipelines (Gemini & OpenAI)
     // -------------------------------------------------------------
     async function runLiveAIGenerator(userIdea, activeIntent, provider, apiKey) {
-        // Cancel any pending fetch requests
         if (apiAbortController) {
             apiAbortController.abort();
         }
         apiAbortController = new AbortController();
 
-        addConsoleLog(`Connecting to ${provider.toUpperCase()} API endpoint...`);
         promptOutput.value = "Generative stream connecting... Please wait...";
         promptOutput.style.opacity = "0.6";
 
@@ -474,17 +448,12 @@ Make sure the instructions are highly specific to the domain: ${activeIntent.toU
             }
 
             promptOutput.style.opacity = "1";
-            addConsoleLog(`Live prompt optimization complete!`, false);
             updateStats();
             addToHistoryDebounced(userIdea, activeIntent);
 
         } catch (err) {
-            if (err.name === "AbortError") {
-                addConsoleLog("API request aborted.");
-                return;
-            }
+            if (err.name === "AbortError") return;
             console.error("Live API Error:", err);
-            addConsoleLog(`[API ERROR] ${err.message}. Reverting to local engine.`, true);
             promptOutput.style.opacity = "1";
             
             // Graceful Fallback to Local Engine
@@ -493,7 +462,7 @@ Make sure the instructions are highly specific to the domain: ${activeIntent.toU
     }
 
     // -------------------------------------------------------------
-    // 8. Offline Local Prompt Templates Generator
+    // 7. Offline Local Prompt Templates Generator
     // -------------------------------------------------------------
     function generateLocalTemplate(userIdea, activeIntent) {
         let promptText = "";
@@ -579,7 +548,7 @@ EXPLAIN ACCORDING TO THIS PEDAGOGICAL BREAKDOWN:
 1. The 10-Year-Old Explanation: Define the baseline concept simply in 2 sentences using plain language with zero jargon.
 2. The Analogical Metaphor: Map the core mechanisms of "${userIdea}" directly onto a familiar everyday object or scenario (e.g., a factory, plumbing system, or cooking recipe).
 3. Technical Core: Break down the top 3 critical terms or mathematical mechanisms.
-4. Misconceptions: Address 2 common misunderstandings people make when learning this topic.
+4. Misconceptions: Address 2 common misunderstandings people have about this topic.
 5. Verification: End with a 2-question self-check quiz to test the reader's comprehension.`;
         }
         else {
@@ -594,7 +563,6 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
 
         promptOutput.value = promptText;
         updateStats();
-        addConsoleLog(`Local compilation complete.`);
         addToHistoryDebounced(userIdea, activeIntent);
     }
 
@@ -620,16 +588,14 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
         const apiKey = localStorage.getItem(LOCAL_KEY_KEY) || "";
 
         if (provider !== "none" && apiKey.trim() !== "") {
-            // Live AI mode
             runLiveAIGenerator(userIdea, activeIntent, provider, apiKey);
         } else {
-            // Offline fallback
             generateLocalTemplate(userIdea, activeIntent);
         }
     }
 
     // -------------------------------------------------------------
-    // 9. Statistics Engine
+    // 8. Statistics Engine
     // -------------------------------------------------------------
     function updateStats() {
         const text = promptOutput.value;
@@ -642,14 +608,14 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
     }
 
     // -------------------------------------------------------------
-    // 10. Persistence Operations (LocalStorage)
+    // 9. Persistence Operations (LocalStorage)
     // -------------------------------------------------------------
     saveLibraryBtn.addEventListener("click", () => {
         const idea = conceptInput.value.trim();
         const text = promptOutput.value;
         if (!idea || !text) return;
 
-        const customName = prompt(`Enter a label for this saved prompt:`, `Prompt: ${idea.substring(0, 30)}...`);
+        const customName = prompt("Enter a label for this saved prompt:", `Prompt: ${idea.substring(0, 30)}...`);
         if (customName === null) return;
         
         const label = customName.trim() || `Prompt: ${idea.substring(0, 25)}`;
@@ -668,7 +634,6 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
         
         loadSidebarData();
         showToast("Saved to library!");
-        addConsoleLog(`Saved prompt stored in library: "${label}"`);
     });
 
     let historyTimeout;
@@ -730,6 +695,7 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
                     } else {
                         const item = saved.find(item => item.id === id);
                         loadSavedConfig(item);
+                        sidebar.classList.add("collapsed"); // Close library drawer on load
                     }
                 });
             });
@@ -755,6 +721,7 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
                     const id = el.dataset.id;
                     const item = history.find(item => item.id === id);
                     loadSavedConfig(item);
+                    sidebar.classList.add("collapsed"); // Close library drawer on load
                 });
             });
         }
@@ -765,7 +732,6 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
         updateClearBtnVisibility();
         promptOutput.value = item.prompt;
         updateStats();
-        addConsoleLog(`Loaded prompt from library: "${item.idea.substring(0, 20)}..."`);
         showToast("Saved prompt loaded!");
     }
 
@@ -807,7 +773,7 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
     }
 
     // -------------------------------------------------------------
-    // 11. Event Bindings & Utilities
+    // 10. Event Bindings & Utilities
     // -------------------------------------------------------------
     function setupEventListeners() {
         toggleSidebarBtn.addEventListener("click", () => {
@@ -823,7 +789,6 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
             settingsModal.style.display = "none";
         });
 
-        // Modal backdrop click
         settingsModal.addEventListener("click", (e) => {
             if (e.target === settingsModal) {
                 settingsModal.style.display = "none";
@@ -841,7 +806,6 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
 
             settingsModal.style.display = "none";
             updateBadgeState();
-            addConsoleLog(`API configuration saved. Mode: ${provider.toUpperCase()}`);
             showToast("Configuration saved!");
             generateMasterPrompt();
         });
@@ -873,7 +837,6 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
             updateClearBtnVisibility();
             generateMasterPrompt();
             conceptInput.focus();
-            addConsoleLog("Input cleared.");
         });
 
         domainRadios.forEach(radio => {
@@ -890,7 +853,6 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
 
         navigator.clipboard.writeText(textToCopy).then(() => {
             showToast("Copied to clipboard!");
-            addConsoleLog("Prompt copied to clipboard successfully.");
         }).catch(err => {
             console.error("Failed to copy text: ", err);
             promptOutput.select();
@@ -924,11 +886,10 @@ DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
 
         updateClearBtnVisibility();
         generateMasterPrompt();
-        addConsoleLog("Form reset.");
     }
 
     // -------------------------------------------------------------
-    // 12. Technical AI Neural Data-Flow Background Canvas
+    // 11. Technical AI Neural Data-Flow Background Canvas
     // -------------------------------------------------------------
     function initBgAnimation() {
         const canvas = document.getElementById("bg-canvas");
