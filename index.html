@@ -79,7 +79,7 @@
 
     <!-- MAIN APP CONTAINER -->
     <main class="app-layout">
-        <!-- SIDEBAR: SAVED PROMPTS DRAWER (SLIDES OVER THE SCREEN ON MOBILE/LAPTOP) -->
+        <!-- SIDEBAR: SAVED PROMPTS DRAWER -->
         <aside id="sidebar" class="sidebar collapsed">
             <div class="sidebar-header">
                 <h3>Saved Library</h3>
@@ -116,21 +116,31 @@
                     <p class="helper-text">Type naturally or dictate. Typos are corrected automatically.</p>
                 </div>
 
+                <!-- Unified Input Block (ChatGPT Style - No overlapping buttons) -->
                 <div class="concept-input-container">
                     <textarea id="concept-input" class="idea-textarea" placeholder="e.g. Write a python web scraper, explain quantume physics simply, or write a cold outreach email to a tech recruter..."></textarea>
                     
-                    <div class="input-controls">
-                        <button id="mic-btn" class="icon-btn mic-btn" title="Voice Dictation">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                                <line x1="12" y1="19" x2="12" y2="23"></line>
-                                <line x1="8" y1="23" x2="16" y2="23"></line>
-                            </svg>
-                        </button>
-                        <button id="clear-input-btn" class="icon-btn clear-btn" title="Clear text">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                        </button>
+                    <div class="textarea-footer">
+                        <div class="footer-left">
+                            <!-- Action visualizer feedback (Active on voice dictation) -->
+                            <div id="listening-container" style="display:none; align-items:center; gap:0.4rem;">
+                                <span class="recording-pulse"></span>
+                                <span class="listening-lbl">Listening...</span>
+                            </div>
+                        </div>
+                        <div class="textarea-actions">
+                            <button id="mic-btn" class="action-icon-btn" title="Voice Dictation">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                                </svg>
+                            </button>
+                            <button id="clear-input-btn" class="action-icon-btn" title="Clear text">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -140,12 +150,8 @@
                     <span id="autocorrect-text">No typos detected</span>
                 </div>
 
-                <!-- Audio Wave Visualizer -->
-                <div id="listening-container" class="listening-status" style="display:none;">
-                    <div class="listening-text-row">
-                        <span class="recording-pulse"></span>
-                        <span>Listening... Speak clearly</span>
-                    </div>
+                <!-- Voice dictation wave canvas visualizer -->
+                <div id="wave-container" class="wave-visualizer-container" style="display:none;">
                     <canvas id="voice-wave-canvas" class="voice-wave-canvas" width="300" height="34"></canvas>
                 </div>
 
@@ -176,38 +182,60 @@
                 </div>
             </div>
 
-            <!-- CENTER GLOWING SEPARATOR (Only visible on laptops) -->
+            <!-- CENTER GLOWING SEPARATOR -->
             <div class="workspace-separator"></div>
 
             <!-- RIGHT WORKSPACE: OUTPUT -->
             <div class="workspace-side right-side">
                 <div class="side-header">
                     <h2>Engineered Master Prompt</h2>
-                    <p class="helper-text">Ready to copy and paste directly into ChatGPT or Claude.</p>
+                    <p class="helper-text">Optimized instructions. Ready to run directly in AI agents.</p>
                 </div>
 
                 <div class="preview-container">
                     <textarea id="prompt-output" class="prompt-textarea" placeholder="Your optimized prompt will appear here..." readonly></textarea>
                 </div>
 
-                <div class="action-bar-row">
-                    <div class="stats-mini">
-                        <div class="mini-stat">Words: <strong id="stat-words">0</strong></div>
-                        <div class="mini-stat">Tokens: <strong id="stat-tokens">0</strong></div>
+                <!-- Action Toolbar & Agent Links -->
+                <div class="action-bar-column">
+                    <div class="action-bar-row">
+                        <div class="stats-mini">
+                            <div class="mini-stat">Words: <strong id="stat-words">0</strong></div>
+                            <div class="mini-stat">Tokens: <strong id="stat-tokens">0</strong></div>
+                        </div>
+                        
+                        <div class="actions-group">
+                            <button id="copy-btn" class="btn btn-primary" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                                <span>Copy Prompt</span>
+                            </button>
+                            <button id="save-library-btn" class="btn btn-secondary" title="Save Prompt" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                            </button>
+                            <button id="reset-btn" class="btn btn-secondary" title="Reset UI">Reset</button>
+                        </div>
                     </div>
-                    
-                    <div class="actions-group">
-                        <button id="copy-btn" class="btn btn-primary" disabled>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                            </svg>
-                            <span>Copy Prompt</span>
-                        </button>
-                        <button id="save-library-btn" class="btn btn-secondary" title="Save Prompt" disabled>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-                        </button>
-                        <button id="reset-btn" class="btn btn-secondary" title="Reset UI">Reset</button>
+
+                    <!-- Floating AI Agent Launcher Shortcuts -->
+                    <div class="ai-agents-row">
+                        <span class="launch-label">Launch Agent:</span>
+                        <div class="agent-links">
+                            <a href="https://chatgpt.com" target="_blank" rel="noopener" class="agent-btn link-chatgpt">
+                                <span>ChatGPT</span>
+                            </a>
+                            <a href="https://claude.ai" target="_blank" rel="noopener" class="agent-btn link-claude">
+                                <span>Claude</span>
+                            </a>
+                            <a href="https://gemini.google.com" target="_blank" rel="noopener" class="agent-btn link-gemini">
+                                <span>Gemini</span>
+                            </a>
+                            <a href="https://copilot.microsoft.com" target="_blank" rel="noopener" class="agent-btn link-copilot">
+                                <span>Copilot</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const clearInputBtn = document.getElementById("clear-input-btn");
     const micBtn = document.getElementById("mic-btn");
     const listeningIndicator = document.getElementById("listening-container");
+    const waveContainer = document.getElementById("wave-container");
     const domainRadios = document.querySelectorAll('input[name="domain"]');
     const autocorrectBanner = document.getElementById("autocorrect-banner");
     const autocorrectText = document.getElementById("autocorrect-text");
@@ -121,6 +122,25 @@ document.addEventListener("DOMContentLoaded", () => {
         updateBadgeState();
     }
 
+    // Intent Detector for Auto-Detect fallback
+    function detectIntent(userSentence) {
+        const text = userSentence.toLowerCase();
+
+        if (text.match(/photo|image|picture|edit|photograph|portrait|camera|lighting|midjourney|dall-e|photoshop|background|background removal|render|8k|lens|aspect ratio/)) {
+            return "photo";
+        }
+        if (text.match(/code|python|javascript|react|html|css|sql|script|build|develop|bug|api|database|algorithm|function|scrape|web|app|debug|fix|program/)) {
+            return "coding";
+        }
+        if (text.match(/email|job|resume|cover letter|recruiter|interview|business|sales|pitch|marketing|client|strategy|manager|career|post|linkedin/)) {
+            return "business";
+        }
+        if (text.match(/explain|teach|understand|analogy|concept|math|physics|science|history|learn|study|roadmap|summary|difference|how does|why/)) {
+            return "learning";
+        }
+        return "general";
+    }
+
     // -------------------------------------------------------------
     // 2. Web Speech API (Voice Dictation Module)
     // -------------------------------------------------------------
@@ -140,6 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 initialText = conceptInput.value;
                 micBtn.classList.add("active");
                 listeningIndicator.style.display = "flex";
+                waveContainer.style.display = "block";
                 showToast("🎙️ Listening... Speak your request!");
                 startVoiceWaveAnimation();
             };
@@ -153,7 +174,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     conceptInput.value = (initialText ? initialText.trim() + " " : "") + currentTranscript.trim();
                     updateClearBtnVisibility();
                     
-                    // Live autocorrect debounced
                     clearTimeout(autocorrectTimeout);
                     autocorrectTimeout = setTimeout(() => {
                         processSpellingCorrection(true);
@@ -201,6 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
         isListening = false;
         micBtn.classList.remove("active");
         listeningIndicator.style.display = "none";
+        waveContainer.style.display = "none";
         if (waveId) {
             cancelAnimationFrame(waveId);
             waveId = null;
@@ -307,8 +328,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     ? correctedValue[0].toUpperCase() + correctedValue.slice(1)
                     : correctedValue;
                 
-                const puncStart = word.match(/^[.,\/#!$%\^&\*;:{}=\-_`~()?"']*/)[0];
-                const puncEnd = word.match(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']*$/)[0];
+                // Defensive extraction of punctuation prefixes and suffixes (prevents Null Pointer crash)
+                const puncStartMatch = word.match(/^[.,\/#!$%\^&\*;:{}=\-_`~()?"']+/);
+                const puncEndMatch = word.match(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']+$/);
+                const puncStart = puncStartMatch ? puncStartMatch[0] : "";
+                const puncEnd = puncEndMatch ? puncEndMatch[0] : "";
                 
                 correctedWords.push(puncStart + replacement + puncEnd);
                 correctedCount++;
@@ -381,13 +405,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         apiAbortController = new AbortController();
 
-        promptOutput.value = "Generative stream connecting... Please wait...";
+        promptOutput.value = "Optimizing via Live AI... Please wait...";
         promptOutput.style.opacity = "0.6";
 
-        let systemInstruction = `You are a world-class prompt engineer. Your goal is to transform the user's raw idea into an extremely powerful, detailed, and context-expanded ChatGPT prompt.
-Do NOT reply to the user's request. Do NOT write code or write the final output. Write ONLY the engineered prompt instructions.
-Include a relevant expert role, technical boundaries, clear formatting instructions, and quality checkpoints custom-tailored to this exact idea: "${userIdea}".
-Make sure the instructions are highly specific to the domain: ${activeIntent.toUpperCase()}.`;
+        let systemInstruction = `You are a world-class prompt engineer. Your goal is to transform the user's raw idea into an extremely powerful, detailed, and context-expanded prompt targeting other LLM AI Agents (like ChatGPT, Claude, and Gemini).
+DO NOT talk to the user. Do NOT write greetings, summaries, or conversational filler.
+DO NOT use markdown code blocks (\`\`\` or \`\`\`markdown) to wrap your prompt.
+Write ONLY the final prompt body itself. The prompt must start directly with the instruction directive (e.g. "Act as a..." or "You are...").
+Ensure the engineered prompt is purely accurate, direct, and completely ready to run.
+
+User Raw Idea: "${userIdea}"
+Target Category: ${activeIntent.toUpperCase()}`;
 
         try {
             if (provider === "gemini") {
@@ -470,93 +498,92 @@ Make sure the instructions are highly specific to the domain: ${activeIntent.toU
         if (activeIntent === "photo") {
             const isEditing = userIdea.toLowerCase().match(/edit|change|remove|replace|modify/);
             if (isEditing) {
-                promptText = `You are a high-end Digital Retoucher and Photoshop AI Specialist. Your task is to modify a photo according to these specific edits: "${userIdea}".
+                promptText = `ACT AS A DIGITAL RETOUCHER AND PHOTOSHOP AI SPECIALIST. Modify the following visual asset based on these instructions: "${userIdea}".
 
-Follow these advanced technical parameters to generate the edit:
-1. Composition Alignment: Analyze the lighting angle, contrast curve, and edge occlusion of the existing subject.
-2. Background Blending: Feather the edges of replaced objects using a 1.5px radius mask to eliminate visual borders.
-3. Shadows & Relighting: Match the light source direction. Render contact shadows (dark, sharp occlusion shadows at bases) and soft cast shadows.
-4. Color Matching: Perform a color balance matching the ambient temperature (Kelvin) of the background.
-5. Provide step-by-step instructions on adjusting Exposure, Highlights, Shadows, and Color channels to manually refine the edit in Adobe Lightroom or Photoshop.`;
+TECHNICAL PARAMETERS:
+1. Composition: Align light source coordinates and contrast values between elements.
+2. Feathering: Blend edges of replaced layers using a 1.5px radius mask to eliminate seams.
+3. Light & Shadows: Match ambient light direction. Render contact shadows and soft cast shadows.
+4. Color Balance: Match ambient Kelvin temperature to fit the background color space.
+5. Manually edit Photoshop Exposure, Highlights, Shadows, and Color channels to complete the request.`;
             } else {
-                promptText = `You are an expert Commercial Photographer and AI Prompt Engineer. Expand the following visual idea into an ultra-detailed Midjourney / DALL-E 3 image generation prompt: "${userIdea}".
+                promptText = `ACT AS A COMMERCIAL PHOTOGRAPHER. Generate an ultra-detailed image generation command matching this concept: "${userIdea}".
 
-Generate the prompt using this exact structure:
-/imagine prompt: ${userIdea}, shot on Hasselblad H6D-100c, 85mm f/1.4 lens, cinematic Rembrandt lighting with warm golden hour backlighting, volumetric haze, hyperrealistic skin textures, 8k resolution, photorealistic render, color graded in teal and orange palette, highly detailed background scenery --ar 16:9 --style raw --v 6.0`;
+OUTPUT FORMAT (Write only this line):
+/imagine prompt: ${userIdea}, shot on Hasselblad H6D-100c, 85mm lens, f/1.4 aperture, cinematic Rembrandt lighting, volumetric mist, hyperrealistic skin textures, 8k resolution, color graded in warm teal and orange --ar 16:9 --style raw --v 6.0`;
             }
         }
         else if (activeIntent === "coding") {
             let language = "modern code";
             if (userIdea.toLowerCase().match(/python/)) language = "Python 3.11+";
             else if (userIdea.toLowerCase().match(/javascript|js/)) language = "modern ES6+ JavaScript";
-            else if (userIdea.toLowerCase().match(/react/)) language = "React 18 with functional hooks";
-            else if (userIdea.toLowerCase().match(/html|css/)) language = "semantic HTML5 and responsive modern CSSGrid";
-            else if (userIdea.toLowerCase().match(/sql/)) language = "PostgreSQL optimized queries";
+            else if (userIdea.toLowerCase().match(/react/)) language = "React 18";
+            else if (userIdea.toLowerCase().match(/html|css/)) language = "semantic HTML5 & CSS Grid";
+            else if (userIdea.toLowerCase().match(/sql/)) language = "PostgreSQL";
 
             let details = "";
             if (userIdea.toLowerCase().match(/scrape|scraper/)) {
-                details = `\nSPECIFIC MODULE INSTRUCTIONS:
-- Implement rotating User-Agents and HTTP headers to prevent anti-bot blocking.
-- Add robust exception handling for HTTP 403 (Forbidden), 429 (Too Many Requests), and network timeouts.
-- Include a 1.5 second rate-limiting delay between recursive requests.
-- Export parsed DOM elements into a clean CSV layout.`;
+                details = `
+- Implement rotating User-Agents and custom headers to bypass scraping blocks.
+- Wrap execution blocks in try-except statements managing HTTP 403, 429, and timeouts.
+- Implement a 1.5s rate-limit delay between loops.
+- Export all data structures into CSV.`;
             } else if (userIdea.toLowerCase().match(/react|app|web/)) {
-                details = `\nSPECIFIC MODULE INSTRUCTIONS:
-- Implement clean functional components with React.useState and React.useEffect.
-- Keep state management structured, clean, and memoized using React.useMemo where appropriate.
-- Ensure the layout is responsive, mobile-first, and fully accessible with ARIA labels.`;
+                details = `
+- Write clean functional components using React Hooks (useState, useEffect).
+- Keep component states modular and implement useMemo optimizations.
+- Ensure layouts are fully responsive and meet accessibility guidelines.`;
             } else if (userIdea.toLowerCase().match(/sql|database/)) {
-                details = `\nSPECIFIC MODULE INSTRUCTIONS:
-- Include proper index suggestions to optimize the query execution path.
-- Avoid nested subqueries in SELECT clauses; use JOINs or Common Table Expressions (CTEs) for efficiency.
-- Provide a brief breakdown of the query execution plan.`;
+                details = `
+- Provide performance indexing recommendations.
+- Avoid nested subqueries; use JOIN operations or Common Table Expressions (CTEs).`;
             }
 
-            promptText = `You are a Principal Software Architect. Write a production-grade, highly efficient solution in ${language} for: "${userIdea}".
+            promptText = `ACT AS A PRINCIPAL SOFTWARE ARCHITECT. Write a production-grade, modular implementation in ${language} for: "${userIdea}".
 ${details}
-CODE REQUIREMENTS:
-1. Maintain strict modularity, naming variables descriptively.
-2. Include try-except exception blocks for all network operations, file I/O, or parsing gates.
-3. Write clean, readable code with comprehensive inline documentation.
-4. Output a single copy-pasteable script including a mock runnable test case. Avoid conversational fluff before the code block.`;
+STANDARDS:
+1. Maintain clean variables and descriptive names.
+2. Include try-catch validation blocks.
+3. Write clean, readable code with inline comments.
+4. Output a single copy-pasteable script including a mock runnable test case. Avoid conversational conversational intros.`;
         } 
         else if (activeIntent === "business") {
             const isEmail = userIdea.toLowerCase().match(/email|outreach|message/);
             if (isEmail) {
-                promptText = `You are an expert Copywriter and Talent Consultant. Write a high-converting cold outreach email targeting a recruiter/hiring manager based on this goal: "${userIdea}".
+                promptText = `ACT AS A CONVERSION COPYWRITER. Write a high-converting cold outreach template targeting: "${userIdea}".
 
-STRUCTURE THE EMAIL ACCORDING TO THESE CONSTRAINTS:
-1. Subject Lines: Generate 3 attention-grabbing, short subject lines (< 6 words) optimized for a high open rate.
-2. The Hook: Open with a customized value statement within the first 2 sentences. Skip generic fluff like "Hope this email finds you well."
-3. Body Layout: Bullet point 2-3 quantifiable achievements (e.g. "Optimized DB queries by 40%").
-4. Call to Action: End with a low-friction, single call-to-action (e.g. "Do you have 10 minutes next Thursday for a brief chat?").
-5. Length: Keep the total email length under 150 words.`;
+STRUCTURE CONSTRAINTS:
+1. Provide 3 optimized subject lines under 6 words.
+2. Hook: Lead with a personalized value hook in the first 2 sentences. No generic openings.
+3. Core Value: Bullet point 2 achievements with quantifiable metrics.
+4. CTA: Close with a low-barrier appointment scheduling question.
+5. Limit total email length to under 150 words.`;
             } else {
-                promptText = `You are an Executive Business Strategist. Formulate a professional deliverable for the following request: "${userIdea}".
+                promptText = `ACT AS A STRATEGIC MANAGEMENT CONSULTANT. Formulate a business framework for: "${userIdea}".
 
-STRUCTURE THE OUTPUT ACCORDING TO THESE CONSTRAINTS:
-1. Executive Summary: Provide a 3-sentence high-level overview.
-2. Core Methodology: Provide a step-by-step action plan mapping out key milestones.
-3. KPIs & Metrics: Explicitly state 3 key performance metrics to track progress.
-4. Risk Management: Identify 2 potential risks and outline mitigation strategies.`;
+STRUCTURE CONSTRAINTS:
+1. Executive Summary: Provide a 3-sentence project objective.
+2. Implementation Roadmap: Provide a step-by-step milestone timeline.
+3. Success Metrics: Define 3 key performance indicators (KPIs).
+4. Risk Profile: Outline 2 operational risks and mitigation plans.`;
             }
         }
         else if (activeIntent === "learning") {
-            promptText = `You are an expert Pedagogue and First-Principles Educator. Explain the following concept clearly: "${userIdea}".
+            promptText = `ACT AS A FIRST-PRINCIPLES PEDAGOGIST. Explain this concept step-by-step: "${userIdea}".
 
-EXPLAIN ACCORDING TO THIS PEDAGOGICAL BREAKDOWN:
-1. The 10-Year-Old Explanation: Define the baseline concept simply in 2 sentences using plain language with zero jargon.
-2. The Analogical Metaphor: Map the core mechanisms of "${userIdea}" directly onto a familiar everyday object or scenario (e.g., a factory, plumbing system, or cooking recipe).
-3. Technical Core: Break down the top 3 critical terms or mathematical mechanisms.
-4. Misconceptions: Address 2 common misunderstandings people have about this topic.
-5. Verification: End with a 2-question self-check quiz to test the reader's comprehension.`;
+DELIVERABLE LAYOUT:
+1. Under 10s: Explain the core concept simply to a child.
+2. Metaphor: Map the concept mechanics onto a familiar everyday object or system (e.g. plumbing/cooking).
+3. Technical Terms: Explain the top 3 specialized terms.
+4. Misconceptions: Correct 2 common myths.
+5. Quiz: End with a 2-question self-check.`;
         }
         else {
-            promptText = `You are a Senior Subject Matter Expert. Provide a comprehensive, structured response addressing the following request: "${userIdea}".
+            promptText = `ACT AS A SENIOR SUBJECT MATTER EXPERT. Deliver a highly detailed, professional execution plan for: "${userIdea}".
 
-DEVELOP THE RESPONSE USING THESE PROFESSIONAL STANDARDS:
-1. Core Breakdown: Provide a concise executive overview of the solution.
-2. Technical Roadmap: Detail a step-by-step implementation guide covering all prerequisites.
+DELIVERABLE LAYOUT:
+1. Executive Summary: Deliver a concise overview of the solution.
+2. Technical Roadmap: Outline a step-by-step implementation guide covering all prerequisites.
 3. Practical Application: Highlight 2 concrete examples of how this is applied in industry.
 4. Format: Use clean markdown headers, bold terms, and structured list items. Avoid conversational greetings and start directly with the analysis.`;
         }
