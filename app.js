@@ -1,12 +1,14 @@
-// Promptsmith - Smart Intent-Aware ChatGPT & Image Prompt Generator Engine (Mobile Optimized)
+// Promptsmith - Smart Intent-Aware ChatGPT & Image Prompt Generator Engine
 
 document.addEventListener("DOMContentLoaded", () => {
     // UI Elements
     const conceptInput = document.getElementById("concept-input");
     const clearInputBtn = document.getElementById("clear-input-btn");
     const micBtn = document.getElementById("mic-btn");
-    const listeningIndicator = document.getElementById("listening-indicator");
+    const listeningIndicator = document.getElementById("listening-container");
     const domainRadios = document.querySelectorAll('input[name="domain"]');
+    const autocorrectBanner = document.getElementById("autocorrect-banner");
+    const autocorrectText = document.getElementById("autocorrect-text");
     
     // Enhancers checkboxes
     const addStepByStep = document.getElementById("add-step-by-step");
@@ -39,12 +41,38 @@ document.addEventListener("DOMContentLoaded", () => {
     // Speech-to-Text State
     let recognition = null;
     let isListening = false;
+    let waveId = null;
 
     // LocalStorage keys
     const LOCAL_SAVED_KEY = "promptsmith_saved_prompts";
     const LOCAL_HISTORY_KEY = "promptsmith_history_prompts";
 
-    // Realistic Sample Ideas
+    // Common technology & prompt typos dictionary
+    const typoDict = {
+        "quantume": "quantum",
+        "pythn": "python",
+        "recruter": "recruiter",
+        "photograpgh": "photography",
+        "pepople": "people",
+        "recusion": "recursion",
+        "photosthesis": "photosynthesis",
+        "existentialsm": "existentialism",
+        "chatgpt": "ChatGPT",
+        "javascript": "JavaScript",
+        "typescript": "TypeScript",
+        "writea": "write a",
+        "creater": "create",
+        "developement": "development",
+        "scrpe": "scrape",
+        "desing": "design",
+        "analogyy": "analogy",
+        "codee": "code",
+        "algoritm": "algorithm",
+        "datbase": "database",
+        "articel": "article"
+    };
+
+    // Sample Ideas
     const sampleIdeas = [
         {
             title: "Cinematic Portrait Photo",
@@ -65,10 +93,10 @@ document.addEventListener("DOMContentLoaded", () => {
             idea: "Write a high-converting, professional cold email to a tech recruiter expressing interest in a Software Engineer role."
         },
         {
-            title: "Python Web Scraper Script",
-            category: "Coding & Tech",
-            domain: "coding",
-            idea: "Create a modular Python script using BeautifulSoup to scrape product prices from an e-commerce site and save to CSV."
+            title: "Explain Neural Networks Simply",
+            category: "Study & Explain",
+            domain: "learning",
+            idea: "Explain how Artificial Neural Networks learn using a factory assembly line analogyy."
         }
     ];
 
@@ -104,6 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 micBtn.classList.add("active");
                 listeningIndicator.style.display = "flex";
                 showToast("🎙️ Listening... Speak your request!");
+                startVoiceWaveAnimation();
             };
 
             recognition.onresult = (event) => {
@@ -114,6 +143,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (currentTranscript.trim()) {
                     conceptInput.value = (initialText ? initialText.trim() + " " : "") + currentTranscript.trim();
                     updateClearBtnVisibility();
+                    // Process spelling correction on input
+                    processSpellingCorrection();
                     generateMasterPrompt();
                 }
             };
@@ -158,6 +189,51 @@ document.addEventListener("DOMContentLoaded", () => {
         isListening = false;
         micBtn.classList.remove("active");
         listeningIndicator.style.display = "none";
+        if (waveId) {
+            cancelAnimationFrame(waveId);
+            waveId = null;
+        }
+    }
+
+    // -------------------------------------------------------------
+    // Sine-wave visualizer animation
+    // -------------------------------------------------------------
+    function startVoiceWaveAnimation() {
+        const waveCanvas = document.getElementById("voice-wave-canvas");
+        if (!waveCanvas) return;
+        const waveCtx = waveCanvas.getContext("2d");
+        
+        let step = 0;
+        function render() {
+            if (!isListening) return;
+            waveCtx.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
+            step += 0.15;
+            
+            // Draw three overlapping sine waves (Cyan, Indigo, faint Purple)
+            drawSineWave(waveCtx, waveCanvas, step, 11, "rgba(56, 189, 248, 0.65)", 1.5, 0.05);
+            drawSineWave(waveCtx, waveCanvas, step + 2, 7, "rgba(129, 140, 248, 0.5)", 1.0, 0.08);
+            drawSineWave(waveCtx, waveCanvas, step + 4, 14, "rgba(56, 189, 248, 0.2)", 2.0, 0.03);
+            
+            waveId = requestAnimationFrame(render);
+        }
+        render();
+    }
+
+    function drawSineWave(ctx, canvas, step, amplitude, color, lineWidth, speed) {
+        ctx.beginPath();
+        ctx.lineWidth = lineWidth;
+        ctx.strokeStyle = color;
+        
+        const width = canvas.width;
+        const height = canvas.height;
+        const mid = height / 2;
+        
+        ctx.moveTo(0, mid);
+        for (let x = 0; x < width; x++) {
+            const y = mid + Math.sin(x * speed + step) * amplitude;
+            ctx.lineTo(x, y);
+        }
+        ctx.stroke();
     }
 
     // -------------------------------------------------------------
@@ -190,12 +266,66 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         updateClearBtnVisibility();
+        // Run auto-correction on loaded samples if necessary
+        processSpellingCorrection();
         generateMasterPrompt();
         showToast("Sample prompt loaded!");
     }
 
     // -------------------------------------------------------------
-    // 4. Smart Intent & Photo/Image Generation Logic
+    // 4. Live Spelling Auto-Correct System
+    // -------------------------------------------------------------
+    let autocorrectTimeout;
+    function processSpellingCorrection() {
+        const text = conceptInput.value;
+        if (!text.trim()) {
+            autocorrectBanner.style.display = "none";
+            return;
+        }
+
+        // Tokenize words, check against autocorrect dictionary
+        const words = text.split(/\s+/);
+        let correctedWords = [];
+        let correctedCount = 0;
+        let correctionList = [];
+
+        words.forEach(word => {
+            // Strip punctuation for matching
+            const cleanWord = word.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "");
+            if (typoDict[cleanWord]) {
+                const correctedValue = typoDict[cleanWord];
+                // Keep original case if capitalized
+                const isCapitalized = word[0] === word[0].toUpperCase();
+                const replacement = isCapitalized 
+                    ? correctedValue[0].toUpperCase() + correctedValue.slice(1)
+                    : correctedValue;
+                
+                // Re-apply punctuation
+                const puncStart = word.match(/^[.,\/#!$%\^&\*;:{}=\-_`~()?"']*/)[0];
+                const puncEnd = word.match(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']*$/)[0];
+                
+                correctedWords.push(puncStart + replacement + puncEnd);
+                correctedCount++;
+                correctionList.push(`${cleanWord} → ${correctedValue}`);
+            } else {
+                correctedWords.push(word);
+            }
+        });
+
+        if (correctedCount > 0) {
+            conceptInput.value = correctedWords.join(" ");
+            autocorrectText.textContent = `Auto-corrected spelling: ${correctionList.join(", ")}`;
+            autocorrectBanner.style.display = "flex";
+
+            clearTimeout(autocorrectTimeout);
+            autocorrectTimeout = setTimeout(() => {
+                autocorrectBanner.style.display = "none";
+            }, 5000);
+        }
+    }
+
+    // -------------------------------------------------------------
+    // 5. Smart Intent & Photo/Image Generation Logic
     // -------------------------------------------------------------
     function detectIntent(userSentence) {
         const text = userSentence.toLowerCase();
@@ -302,7 +432,7 @@ DELIVERABLE FRAMEWORK:
 1. EXECUTIVE SUMMARY: Provide a high-level summary of the core solution.
 2. ACTIONABLE STEPS: Detail a step-by-step methodology covering all primary milestones.
 ${addExamples.checked ? "3. PRACTICAL EXAMPLES: Include 2-3 real-world scenarios illustrating the solution.\n" : ""}${addNoFluff.checked ? "4. DIRECT OUTPUT: Eliminate conversational filler. Begin directly with Section 1.\n" : ""}
-${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and structured bullet points." : ""} Let me know if you need any adjustments.`;
+${addFormatting.checked ? "Format with clean Markdown headers, bold terms, and structured bullet points." : ""} Let me know if you need any adjustments.`;
         }
 
         promptOutput.value = promptText;
@@ -311,7 +441,7 @@ ${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and s
     }
 
     // -------------------------------------------------------------
-    // 5. Statistics Engine
+    // 6. Statistics Engine
     // -------------------------------------------------------------
     function updateStats() {
         const text = promptOutput.value;
@@ -324,7 +454,7 @@ ${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and s
     }
 
     // -------------------------------------------------------------
-    // 6. Persistence Operations (LocalStorage)
+    // 7. Persistence Operations (LocalStorage)
     // -------------------------------------------------------------
     saveLibraryBtn.addEventListener("click", () => {
         const idea = conceptInput.value.trim();
@@ -487,7 +617,7 @@ ${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and s
     }
 
     // -------------------------------------------------------------
-    // 7. Event Bindings & Utilities
+    // 8. Event Bindings & Utilities
     // -------------------------------------------------------------
     function setupEventListeners() {
         toggleSidebarBtn.addEventListener("click", () => {
@@ -496,12 +626,15 @@ ${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and s
 
         conceptInput.addEventListener("input", () => {
             updateClearBtnVisibility();
+            // Process spelling correction on input
+            processSpellingCorrection();
             generateMasterPrompt();
         });
 
         clearInputBtn.addEventListener("click", () => {
             conceptInput.value = "";
             stopListening();
+            autocorrectBanner.style.display = "none";
             updateClearBtnVisibility();
             generateMasterPrompt();
             conceptInput.focus();
@@ -551,6 +684,7 @@ ${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and s
     function resetForm() {
         conceptInput.value = "";
         stopListening();
+        autocorrectBanner.style.display = "none";
         domainRadios.forEach((radio, idx) => {
             radio.checked = idx === 0;
         });
@@ -565,7 +699,7 @@ ${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and s
     }
 
     // -------------------------------------------------------------
-    // 8. Mobile-Optimized Neural Background Canvas
+    // 9. Technical AI Neural Data-Flow Background Canvas
     // -------------------------------------------------------------
     function initBgAnimation() {
         const canvas = document.getElementById("bg-canvas");
@@ -585,14 +719,12 @@ ${addFormatting.checked ? "Format with clear Markdown headers, bold terms, and s
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            // Optimize node count on mobile devices to ensure 60fps & low battery consumption
             maxNodes = window.innerWidth < 768 ? 18 : 45;
             populateNodes();
             populateGlyphs();
         }
         window.addEventListener("resize", resize);
 
-        // Touch and mouse event tracking
         window.addEventListener("mousemove", (e) => {
             mouseX = e.clientX;
             mouseY = e.clientY;

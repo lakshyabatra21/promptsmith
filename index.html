@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Promptsmith - Turn any raw idea into a high-accuracy, master prompt for ChatGPT.">
-    <title>Promptsmith — Accurate ChatGPT Prompt Generator</title>
+    <meta name="description" content="Promptsmith - Next-generation, spelling-corrected ChatGPT Master Prompt Builder.">
+    <title>Promptsmith — Next-Gen AI Prompt Engine</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Subtle Ambient Glow Canvas -->
@@ -23,13 +23,13 @@
                     </svg>
                 </div>
                 <span>Promptsmith</span>
-                <span class="trust-badge">FREE & PRIVATE</span>
+                <span class="trust-badge">AUTO-SPELL CHECK</span>
             </div>
             
             <div class="header-actions">
                 <button id="toggle-sidebar-btn" class="header-btn" title="Saved Prompts">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-                    <span>Saved Prompts</span>
+                    <span>Library</span>
                 </button>
                 <a href="https://chatgpt.com" target="_blank" rel="noopener" class="chatgpt-btn">
                     <span>Open ChatGPT</span>
@@ -41,13 +41,13 @@
 
     <!-- HERO INTRO BANNER -->
     <section class="hero-banner">
-        <h1>Transform Ideas & Voice Into <span class="gradient-text">Master ChatGPT Prompts</span></h1>
-        <p>Type or speak what you want to achieve. Promptsmith automatically structures your idea into a professional prompt for accurate AI responses.</p>
+        <h1>Optimize Plain Text Into <span class="gradient-text">Master ChatGPT Prompts</span></h1>
+        <p>Type or speak your idea. Promptsmith automatically corrects typos and structures the prompt for flawless ChatGPT responses.</p>
         
         <div class="trust-pills">
-            <span class="pill">🎙️ Voice Typing Supported</span>
-            <span class="pill">⚡ Works with ChatGPT (GPT-4o), Claude 3.5 & Gemini</span>
-            <span class="pill">🔒 Runs 100% in Browser</span>
+            <span class="pill">🔍 Live Spelling Auto-Correct</span>
+            <span class="pill">🎙️ Live Audio Wave Visualizer</span>
+            <span class="pill">🔒 Runs 100% Client-Side</span>
         </div>
     </section>
 
@@ -64,7 +64,7 @@
                     <span id="saved-count" class="count-badge">0</span>
                 </div>
                 <div id="saved-list" class="sidebar-list">
-                    <div class="empty-state">No saved prompts yet. Click "Save Prompt" to store your favorite prompts here.</div>
+                    <div class="empty-state">No saved prompts yet. Click "Save" to store your favorite prompts here.</div>
                 </div>
             </div>
 
@@ -81,23 +81,22 @@
 
         <!-- MAIN GENERATOR CONTAINER -->
         <div class="app-container">
-            <!-- LEFT CARD: SIMPLE INPUT -->
-            <section class="card">
+            <!-- LEFT CARD: INPUT & AUTO-CORRECT -->
+            <section class="card border-glowing">
                 <div class="card-header">
                     <div class="step-badge">STEP 1</div>
-                    <h2>What do you want ChatGPT to do?</h2>
+                    <h2>Describe your idea or request</h2>
                 </div>
 
                 <div class="input-section">
-                    <!-- Main Textarea with Voice Dictation Button -->
                     <div class="input-group">
                         <div class="concept-input-container">
-                            <textarea id="concept-input" class="idea-textarea" placeholder="Type or click the microphone to speak your idea (e.g. Write a cold email for a developer job...)" rows="4"></textarea>
+                            <textarea id="concept-input" class="idea-textarea" placeholder="Type or click microphone to speak (e.g., Write a cold email for a dev job, or explain quantume computing simply...)" rows="4"></textarea>
                             
                             <!-- Input Control Buttons -->
                             <div class="input-controls">
                                 <!-- Voice Dictation Mic Button -->
-                                <button id="mic-btn" class="icon-btn mic-btn" title="Voice Typing (Speak your idea)">
+                                <button id="mic-btn" class="icon-btn mic-btn" title="Voice Dictation (Speak your idea)">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
                                         <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
@@ -112,17 +111,26 @@
                             </div>
                         </div>
 
-                        <!-- Listening Indicator Pill -->
-                        <div id="listening-indicator" class="listening-status" style="display:none;">
-                            <span class="recording-pulse"></span>
-                            <span>Listening... Speak your request clearly</span>
+                        <!-- Real-time Spelling Auto-correct Banner -->
+                        <div id="autocorrect-banner" class="autocorrect-status" style="display:none;">
+                            <span class="check-icon">✓</span>
+                            <span id="autocorrect-text">Spelling Auto-Corrected: quantume -> quantum</span>
+                        </div>
+
+                        <!-- Voice Waveform Canvas Visualizer (Pulsing during listening) -->
+                        <div id="listening-container" class="listening-status" style="display:none; flex-direction:column; gap:0.5rem;">
+                            <div class="listening-text-row">
+                                <span class="recording-pulse"></span>
+                                <span>Listening... Speak clearly</span>
+                            </div>
+                            <canvas id="voice-wave-canvas" class="voice-wave-canvas" width="300" height="40"></canvas>
                         </div>
                     </div>
 
                     <!-- STEP 2: Goal Selector -->
-                    <div class="card-header" style="margin-top: 0.5rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.06);">
+                    <div class="card-header" style="margin-top: 0.25rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.06);">
                         <div class="step-badge">STEP 2</div>
-                        <h2>Choose Goal Category</h2>
+                        <h2>Choose Goal Category & Structure</h2>
                     </div>
 
                     <div class="option-grid">
@@ -132,7 +140,7 @@
                                 <span class="option-icon">💡</span>
                                 <div>
                                     <strong>General Task</strong>
-                                    <small>Standard everyday request</small>
+                                    <small>Standard request structure</small>
                                 </div>
                             </div>
                         </label>
@@ -142,7 +150,7 @@
                                 <span class="option-icon">📷</span>
                                 <div>
                                     <strong>Photo & Image AI</strong>
-                                    <small>Midjourney, DALL-E, Edit prompts</small>
+                                    <small>Midjourney / DALL-E prompts</small>
                                 </div>
                             </div>
                         </label>
@@ -152,7 +160,7 @@
                                 <span class="option-icon">💼</span>
                                 <div>
                                     <strong>Job & Email</strong>
-                                    <small>Cover letters, emails, pitch</small>
+                                    <small>Cover letters, emails, resumes</small>
                                 </div>
                             </div>
                         </label>
@@ -162,7 +170,7 @@
                                 <span class="option-icon">💻</span>
                                 <div>
                                     <strong>Coding & Tech</strong>
-                                    <small>Scripts, debugging, architecture</small>
+                                    <small>Modular scripts, architecture</small>
                                 </div>
                             </div>
                         </label>
@@ -172,19 +180,19 @@
                                 <span class="option-icon">📚</span>
                                 <div>
                                     <strong>Study & Explain</strong>
-                                    <small>Analogies, study plans, summaries</small>
+                                    <small>Analogies, quizzes, roadmaps</small>
                                 </div>
                             </div>
                         </label>
                     </div>
 
-                    <!-- Options & Enhancers -->
-                    <div class="input-group" style="margin-top: 0.5rem;">
-                        <label class="label-title">Prompt Enhancers</label>
+                    <!-- Prompt Enhancers -->
+                    <div class="input-group" style="margin-top: 0.25rem;">
+                        <label class="label-title">Core Prompt Rules</label>
                         <div class="checkbox-grid">
                             <label class="custom-checkbox">
                                 <input type="checkbox" id="add-step-by-step" checked>
-                                <span>Require Step-by-Step Explanation</span>
+                                <span>Require Step-by-Step Logic</span>
                             </label>
                             <label class="custom-checkbox">
                                 <input type="checkbox" id="add-examples" checked>
@@ -204,7 +212,7 @@
             </section>
 
             <!-- RIGHT CARD: MASTER PROMPT OUTPUT -->
-            <section class="card output-card">
+            <section class="card output-card border-glowing">
                 <div class="card-header">
                     <div class="step-badge step-success">STEP 3</div>
                     <h2>Optimized Master Prompt</h2>
@@ -225,7 +233,7 @@
                         <span id="stat-words" class="stat-value">0</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">Accuracy Rating</span>
+                        <span class="stat-label">Optimization Grade</span>
                         <span id="stat-quality" class="stat-value text-glow">99.4% Optimized</span>
                     </div>
                 </div>
@@ -259,19 +267,19 @@
     <!-- TRUST FOOTER -->
     <section class="trust-features">
         <div class="feature-item">
-            <div class="feature-icon">🎙️</div>
-            <h4>Voice Dictation Engine</h4>
-            <p>Click the microphone to dictate your prompt using speech-to-text for hands-free prompt generation.</p>
+            <div class="feature-icon">🔍</div>
+            <h4>Spelling Auto-Correction</h4>
+            <p>Built-in dictionary automatically patches technical spelling mistakes as you type so prompts are generated correctly.</p>
         </div>
         <div class="feature-item">
-            <div class="feature-icon">🔒</div>
-            <h4>100% Free & Private</h4>
-            <p>Your inputs never leave your web browser. No login, registration, or credit card required.</p>
+            <div class="feature-icon">🎙️</div>
+            <h4>Live Voice Dictation</h4>
+            <p>Dictate prompts hands-free with an animated visualizer monitoring sound frequencies in real-time.</p>
         </div>
         <div class="feature-item">
             <div class="feature-icon">⚡</div>
-            <h4>Copy & Paste Ready</h4>
-            <p>Designed to work seamlessly with ChatGPT, Claude 3.5, Google Gemini, and Microsoft Copilot.</p>
+            <h4>Ready-Made Templates</h4>
+            <p>Pick a goal category. The engine automatically adapts code parameters, camera specifications, or business hooks.</p>
         </div>
     </section>
 
