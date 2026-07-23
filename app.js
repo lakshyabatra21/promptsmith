@@ -1,4 +1,4 @@
-// Promptsmith - High-Trust Next-Gen Hybrid AI Prompt Expansion Engine
+// Promptsmith - High-Trust Next-Gen Cybernetic AI Prompt Engine
 
 document.addEventListener("DOMContentLoaded", () => {
     // UI Elements
@@ -89,28 +89,28 @@ document.addEventListener("DOMContentLoaded", () => {
     // Preset Ideas
     const sampleIdeas = [
         {
-            title: "Beautiful Python Web Scraper",
-            category: "Code & Tech",
+            title: "Resolve CPU Memory Leak",
+            category: "Tough Debugging",
             domain: "coding",
-            idea: "Write a python web scrpe script using beautifulsoup to get product details."
+            idea: "Help me debug a slow node.js heap memory leak crash happening in production."
         },
         {
-            title: "Cold Email to Tech Recruiter",
-            category: "Career & Business",
+            title: "Scale Microservice Architecture",
+            category: "System Design",
+            domain: "coding",
+            idea: "Scale my user authentication system to handle 15,000 requests per second with Docker."
+        },
+        {
+            title: "Crisis Business Negotiation",
+            category: "Crisis Strategy",
             domain: "business",
-            idea: "Write a cold outreach email to a tech recruter for a software developer role."
+            idea: "Prepare a strategic negotiation response for a client demanding a 40% contract rate cut."
         },
         {
-            title: "Explain Quantum Physics simply",
-            category: "Concept Explain",
+            title: "Explain Zero-Knowledge Proofs",
+            category: "Advanced Concept",
             domain: "learning",
-            idea: "Explain quantume physics in simple terms with a factory analogyy."
-        },
-        {
-            title: "Cinematic Portrait Prompt",
-            category: "Photo & Image AI",
-            domain: "photo",
-            idea: "A photograpgh of an old astronaut looking at a neon city on Mars."
+            idea: "Explain cryptographic Zero-Knowledge Proofs (ZKP) simply using first-principles."
         }
     ];
 
@@ -135,13 +135,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (text.match(/photo|image|picture|edit|photograph|portrait|camera|lighting|midjourney|dall-e|photoshop|background|background removal|render|8k|lens|aspect ratio/)) {
             return "photo";
         }
-        if (text.match(/code|python|javascript|react|html|css|sql|script|build|develop|bug|api|database|algorithm|function|scrape|web|app|debug|fix|program/)) {
+        if (text.match(/code|python|javascript|react|html|css|sql|script|build|develop|bug|api|database|algorithm|function|scrape|web|app|debug|fix|program|leak|race|crash|cors|deadlock|kubernetes|docker|scale|microservice/)) {
             return "coding";
         }
-        if (text.match(/email|job|resume|cover letter|recruiter|interview|business|sales|pitch|marketing|client|strategy|manager|career|post|linkedin/)) {
+        if (text.match(/email|job|resume|cover letter|recruiter|interview|business|sales|pitch|marketing|client|strategy|manager|career|post|linkedin|crisis|negotiation|contract|deal/)) {
             return "business";
         }
-        if (text.match(/explain|teach|understand|analogy|concept|math|physics|science|history|learn|study|roadmap|summary|difference|how does|why/)) {
+        if (text.match(/explain|teach|understand|analogy|concept|math|physics|science|history|learn|study|roadmap|summary|difference|how does|why|cryptography|quantum|zero-knowledge|blockchain/)) {
             return "learning";
         }
         return "general";
@@ -152,10 +152,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const text = userIdea.toLowerCase();
         const wordCount = userIdea.split(/\s+/).length;
         
-        // Advanced keywords indicating complex systems
-        const hasAdvancedKeywords = text.match(/production|modular|architecture|scra|database|sql|optimize|scale|retries|pipeline|cinematic|hasselblad|lighting|rembrandt|kelvin|quantifiable|mckinsey|conversion|pedagog|first-principles|misconception/);
+        // Critical keywords indicating tough situations
+        const hasToughKeywords = text.match(/leak|race|deadlock|crash|cors|lock|scale|kubernetes|docker|load balancer|architect|microservice|crisis|negotiation|contract|deal|cryptography|quantum|zero-knowledge|blockchain|formula|hasselblad| Rembrandt/);
         
-        if (wordCount >= 8 || hasAdvancedKeywords) {
+        if (wordCount >= 7 || hasToughKeywords) {
             return "advanced";
         }
         return "simple";
@@ -259,9 +259,9 @@ document.addEventListener("DOMContentLoaded", () => {
             waveCtx.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
             step += 0.15;
             
-            drawSineWave(waveCtx, waveCanvas, step, 11, "rgba(56, 189, 248, 0.65)", 1.5, 0.05);
-            drawSineWave(waveCtx, waveCanvas, step + 2, 7, "rgba(129, 140, 248, 0.5)", 1.0, 0.08);
-            drawSineWave(waveCtx, waveCanvas, step + 4, 14, "rgba(56, 189, 248, 0.2)", 2.0, 0.03);
+            drawSineWave(waveCtx, waveCanvas, step, 11, "rgba(0, 242, 254, 0.65)", 1.5, 0.05);
+            drawSineWave(waveCtx, waveCanvas, step + 2, 7, "rgba(155, 81, 224, 0.5)", 1.0, 0.08);
+            drawSineWave(waveCtx, waveCanvas, step + 4, 14, "rgba(0, 242, 254, 0.2)", 2.0, 0.03);
             
             waveId = requestAnimationFrame(render);
         }
@@ -429,17 +429,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const complexity = getComplexity(userIdea);
 
-        let systemInstruction = `You are a world-class prompt engineering thinker. Your goal is to transform the user's raw idea into a highly accurate, naturally written ChatGPT/Claude prompt.
+        let systemInstruction = `You are a world-class prompt engineering architect. Your objective is to compile the user's raw idea into a highly accurate prompt that guarantees correct execution on other AI tools (ChatGPT, Claude, Gemini).
 
-CRITICAL INSTRUCTIONS:
-1. Do NOT use rigid, pre-made structural headings like "[ROLE]", "[CONTEXT]", "[OBJECTIVE]" or "[CONSTRAINTS]". Write the prompt in a fluent, natural human tone.
-2. Analyze Complexity (Current Complexity Target: ${complexity.toUpperCase()}):
-   - If the idea is simple or normal, write a direct, concise, and highly focused prompt. Avoid adding bloated engineering instructions.
-   - If the idea is advanced, write a highly descriptive instruction set outlining specific performance standards and boundaries.
-3. Output ONLY the clean prompt itself. No introductions (e.g. "Here is your prompt:") or code block wrappers (\`\`\` or \`\`\`markdown). The prompt must start directly.
+CORE COMPILATION RULES:
+1. No Rigid Outlines: Do NOT use static headings like "[ROLE]" or "[CONSTRAINTS]". Write a naturally flowing, authoritative prompt.
+2. Analyze Complexity (Current Target: ${complexity.toUpperCase()}):
+   - Simple Mode: Keep it direct, clean, and concise. Get straight to the task.
+   - Advanced Mode: Expand the request to include expert personas, precise technical edge-case directives, performance testing instructions, and safety guidelines.
+3. Strict Output Compliance: Output ONLY the engineered prompt itself. No introductions (like "Here is your prompt:"), greetings, or markdown code block syntax (\`\`\` or \`\`\`markdown).
 
 User Raw Idea: "${userIdea}"
-Target Category: ${activeIntent.toUpperCase()}`;
+Domain context: ${activeIntent.toUpperCase()}`;
 
         try {
             if (provider === "gemini") {
@@ -509,83 +509,97 @@ Target Category: ${activeIntent.toUpperCase()}`;
             console.error("Live API Error:", err);
             promptOutput.style.opacity = "1";
             
-            // Graceful Fallback to Local Engine
+            // Fallback to Local Engine
             generateLocalTemplate(userIdea, activeIntent);
         }
     }
 
     // -------------------------------------------------------------
-    // 7. Real-Time Dynamic Local Prompt Templates (Complexity Aware)
+    // 7. Real-Time Local Prompt Templates (Tough Situation Aware)
     // -------------------------------------------------------------
     function generateLocalTemplate(userIdea, activeIntent) {
         let promptText = "";
         const complexity = getComplexity(userIdea);
+        const lowerIdea = userIdea.toLowerCase();
 
         if (activeIntent === "photo") {
-            const isEditing = userIdea.toLowerCase().match(/edit|change|remove|replace|modify/);
+            const isEditing = lowerIdea.match(/edit|change|remove|replace|modify/);
             if (complexity === "simple") {
                 if (isEditing) {
-                    promptText = `Modify this photo: "${userIdea}". Adjust exposure and lighting to blend the changes cleanly and ensure color tones match.`;
+                    promptText = `Modify this image: "${userIdea}". Smoothly blend the modified elements and balance the lighting so it matches the original background.`;
                 } else {
-                    promptText = `Generate a realistic photograph based on this concept: "${userIdea}". Shot on a premium camera, clean cinematic lighting, rich colors, highly detailed.`;
+                    promptText = `Generate a realistic photograph of: "${userIdea}". Shot with cinematic focus and natural lighting.`;
                 }
             } else {
                 if (isEditing) {
-                    promptText = `Act as a professional digital retoucher. Modify this photo matching these details: "${userIdea}". Ensure composition alignment, match ambient Kelvin temperature, blend replaced masks using a feathered 1.5px boundary, and render soft contact and cast shadows matching the primary light direction.`;
+                    promptText = `Act as an expert digital compositor. Modify the image based on this objective: "${userIdea}". Align shadows and relight subjects to match the direction of the key light source. Use a feathered 1.5px boundary mask to blend modifications, align contrast curves, match ambient color space Kelvin temperatures, and output manual channel instructions for Photoshop.`;
                 } else {
-                    promptText = `Act as an art director. Create a Midjourney image command for: "${userIdea}". Output only: /imagine prompt: ${userIdea}, shot on Hasselblad H6D-100c, 85mm f/1.4 lens, Rembrandt portrait lighting, volumetric haze, cinematic color grading, teal and orange palette, highly detailed --ar 16:9 --style raw --v 6.0`;
+                    promptText = `Act as a cinematic art director. Generate a Midjourney image command for: "${userIdea}". Output only: /imagine prompt: ${userIdea}, shot on Hasselblad H6D-100c, 85mm lens, f/1.4 aperture, cinematic Rembrandt lighting, volumetric sunbeams, warm golden hour rim light, highly detailed textures, amber color grade --ar 16:9 --style raw --v 6.0`;
                 }
             }
         }
         else if (activeIntent === "coding") {
             let language = "code";
-            if (userIdea.toLowerCase().match(/python/)) language = "Python";
-            else if (userIdea.toLowerCase().match(/javascript|js/)) language = "JavaScript";
-            else if (userIdea.toLowerCase().match(/react/)) language = "React";
-            else if (userIdea.toLowerCase().match(/html|css/)) language = "HTML & CSS";
-            else if (userIdea.toLowerCase().match(/sql/)) language = "SQL";
+            if (lowerIdea.match(/python/)) language = "Python";
+            else if (lowerIdea.match(/javascript|js/)) language = "JavaScript";
+            else if (lowerIdea.match(/react/)) language = "React";
+            else if (lowerIdea.match(/html|css/)) language = "HTML & CSS";
+            else if (lowerIdea.match(/sql/)) language = "SQL";
+
+            const isDebugging = lowerIdea.match(/leak|race|crash|cors|deadlock|bug|error|slow|heap/);
+            const isScaling = lowerIdea.match(/scale|kubernetes|docker|load balancer|architect|microservice|distributed/);
 
             if (complexity === "simple") {
-                promptText = `Write a clean, readable, and optimized ${language} implementation for: "${userIdea}". Include brief comments and a usage example.`;
-            } else {
-                let details = "";
-                if (userIdea.toLowerCase().match(/scrape|scraper/)) {
-                    details = " Implement rotating User-Agents, custom request headers, and try-except error management for 403/429 limits. Add a 1.5s delay rate-limit.";
-                } else if (userIdea.toLowerCase().match(/react|app|web/)) {
-                    details = " Write modular functional components, manage state correctly with hooks, implement performance memoization, and ensure full mobile responsiveness.";
+                if (isDebugging) {
+                    promptText = `Analyze and fix the following programming issue: "${userIdea}". Find the root cause, write corrected code, and outline the fix simply.`;
+                } else {
+                    promptText = `Write a clean, readable, and optimized ${language} function for: "${userIdea}". Include brief docstrings and a quick test case.`;
                 }
-                promptText = `Act as a senior software architect. Implement a production-grade, highly optimized, and modular solution in ${language} for: "${userIdea}".${details} Wrap operations in try-catch structures for error validation, maintain dry coding rules, and output a copy-pasteable script with a runnable test case.`;
+            } else {
+                if (isDebugging) {
+                    promptText = `Act as a Staff Debugging Specialist. Troubleshoot this critical runtime failure: "${userIdea}". First, outline a diagnostic strategy using memory profiling tools (like Chrome DevTools or heapdumps). Second, analyze potential race conditions or lock patterns. Third, write modular, corrected code using safe resource disposal blocks and event handlers. Finally, document how to verify the solution under load.`;
+                } else if (isScaling) {
+                    promptText = `Act as a Principal Infrastructure Architect. Scale this component: "${userIdea}". Provide a distributed architecture layout utilizing load balancers, caching layers, and microservice segregation. Write clean Dockerfile definitions, outline caching rules (e.g. Redis key expiration), specify Kubernetes deployment topologies with health probes, and show a modular configuration script.`;
+                } else {
+                    promptText = `Act as a Senior Software Developer. Write a production-grade, highly optimized solution in ${language} for: "${userIdea}". Implement modular separation of concerns, wrap operations in robust error catching blocks, prevent resource leakage, and provide a single copy-pasteable script with a runnable test case.`;
+                }
             }
         } 
         else if (activeIntent === "business") {
-            const isEmail = userIdea.toLowerCase().match(/email|outreach|message/);
+            const isEmail = lowerIdea.match(/email|outreach|message/);
+            const isCrisis = lowerIdea.match(/crisis|negotiation|contract|deal|dispute|problem/);
+
             if (complexity === "simple") {
                 if (isEmail) {
-                    promptText = `Write a short, engaging cold email outreach based on: "${userIdea}". Keep it friendly, direct, and under 120 words with a clear call to action.`;
+                    promptText = `Write a brief, engaging cold outreach message for: "${userIdea}". Keep it direct, professional, and under 120 words.`;
                 } else {
-                    promptText = `Provide a clear, brief business plan addressing: "${userIdea}". List the main steps and key goals.`;
+                    promptText = `Outline a basic business approach for: "${userIdea}". Highlight the core objectives and list key action items.`;
                 }
             } else {
-                if (isEmail) {
-                    promptText = `Act as a conversion copywriter. Write a high-converting cold email campaign based on: "${userIdea}". Offer 3 short subject lines (<6 words), open with an immediate personalized value hook statement, list 2 quantifiable achievement metrics, end with a single low-barrier call to action, and keep it under 150 words.`;
+                if (isCrisis) {
+                    promptText = `Act as a Senior Business Negotiator. Develop a strategic crisis response and negotiation guide for: "${userIdea}". Outline 3 target outcomes, detail a step-by-step communication strategy applying negotiation heuristics (e.g., behavioral labeling, calibrating questions), write 3 ready-to-send email templates, and list 2 operational risks with backup mitigation strategies.`;
+                } else if (isEmail) {
+                    promptText = `Act as a conversion copywriter. Write a highly persuasive cold email template for: "${userIdea}". Generate 3 short subject lines (<6 words), lead with a personalized value hook statement in the first 2 sentences, list 2 metrics-driven achievements using bullet points, end with a low-barrier call to action, and limit total word count to 150.`;
                 } else {
-                    promptText = `Act as a management consultant. Formulate a structured business analysis framework for: "${userIdea}". Provide a clear executive summary, a milestone implementation timeline, 3 performance tracking KPIs, and outline 2 operational risks with mitigation plans.`;
+                    promptText = `Act as a management consultant. Formulate a professional business framework for: "${userIdea}". Provide an executive summary, a milestone roadmap, define 3 quantifiable success KPIs, and outline a risk mitigation profile.`;
                 }
             }
         }
         else if (activeIntent === "learning") {
+            const isAdvancedScience = lowerIdea.match(/cryptography|quantum|zero-knowledge|blockchain|physics|math|calculus/);
+
             if (complexity === "simple") {
-                promptText = `Explain this concept simply in plain English: "${userIdea}". Use an intuitive, real-world metaphor to make it easy to understand.`;
+                promptText = `Explain this concept simply to a beginner: "${userIdea}". Use an easy everyday metaphor to clarify how it works.`;
             } else {
-                promptText = `Act as an educator. Explain the concept "${userIdea}" using first principles. Start with an ELI5 simple breakdown, map its mechanics to a familiar real-world metaphor, clarify the top 3 core technical terminologies, debunk 2 common misconceptions, and provide a 2-question self-check quiz.`;
+                if (isAdvancedScience) {
+                    promptText = `Act as a theoretical physicist and research educator. Explain the advanced concept "${userIdea}" using first principles. Provide a 3-sentence ELI5 baseline description, map the mechanics onto a detailed metaphorical system, explain the top 3 equations or underlying mathematical properties, outline 2 limitations or current research bottlenecks, and provide a 2-question conceptual quiz.`;
+                } else {
+                    promptText = `Act as a first-principles educator. Explain this concept step-by-step: "${userIdea}". Lead with an ELI10 baseline explanation, map its mechanics to a real-world metaphor, break down 3 core technical terminologies, correct 2 common misconceptions, and end with a 2-question self-check quiz.`;
+                }
             }
         }
         else {
-            if (complexity === "simple") {
-                promptText = `Provide a direct, accurate response answering: "${userIdea}". Keep it concise and formatted with simple bullet points.`;
-            } else {
-                promptText = `Act as a subject matter expert. Deliver a structured execution plan for: "${userIdea}". Provide an executive summary, a detailed roadmap covering prerequisites, highlight 2 practical industry use cases, and use clean markdown layout structure.`;
-            }
+            promptText = `Act as a Senior Consultant. Deliver a highly detailed, professional execution plan for: "${userIdea}". Provide an executive summary, a technical roadmap covering all prerequisites, highlight 2 practical industry use cases, and use clean markdown layout structure.`;
         }
 
         promptOutput.value = promptText;
@@ -594,13 +608,10 @@ Target Category: ${activeIntent.toUpperCase()}`;
         addToHistoryDebounced(userIdea, activeIntent);
     }
 
-    // -------------------------------------------------------------
     // Dynamic Pre-Filled URL Links Constructor
-    // -------------------------------------------------------------
     function updateLauncherLinks() {
         const text = promptOutput.value.trim();
         if (!text) {
-            // Restore default base links
             linkChatgpt.href = "https://chatgpt.com";
             linkClaude.href = "https://claude.ai";
             linkGemini.href = "https://gemini.google.com";
@@ -610,11 +621,9 @@ Target Category: ${activeIntent.toUpperCase()}`;
 
         const encodedText = encodeURIComponent(text);
 
-        // Pre-fill query links
         linkChatgpt.href = `https://chatgpt.com/?q=${encodedText}`;
         linkGemini.href = `https://gemini.google.com/app?prompt=${encodedText}`;
         linkCopilot.href = `https://copilot.microsoft.com/?q=${encodedText}`;
-        // Claude does not support URL parameters, we keep standard URL but copy prompt automatically on click
         linkClaude.href = "https://claude.ai";
     }
 
@@ -645,9 +654,7 @@ Target Category: ${activeIntent.toUpperCase()}`;
         }
     }
 
-    // -------------------------------------------------------------
-    // 8. Statistics Engine
-    // -------------------------------------------------------------
+    // Statistics Engine
     function updateStats() {
         const text = promptOutput.value;
         const charCount = text.length;
@@ -658,9 +665,7 @@ Target Category: ${activeIntent.toUpperCase()}`;
         statWords.textContent = wordCount;
     }
 
-    // -------------------------------------------------------------
-    // 9. Persistence Operations (LocalStorage)
-    // -------------------------------------------------------------
+    // Persistence Operations (LocalStorage)
     saveLibraryBtn.addEventListener("click", () => {
         const idea = conceptInput.value.trim();
         const text = promptOutput.value;
@@ -746,7 +751,7 @@ Target Category: ${activeIntent.toUpperCase()}`;
                     } else {
                         const item = saved.find(item => item.id === id);
                         loadSavedConfig(item);
-                        sidebar.classList.add("collapsed"); // Close library drawer on load
+                        sidebar.classList.add("collapsed");
                     }
                 });
             });
@@ -772,7 +777,7 @@ Target Category: ${activeIntent.toUpperCase()}`;
                     const id = el.dataset.id;
                     const item = history.find(item => item.id === id);
                     loadSavedConfig(item);
-                    sidebar.classList.add("collapsed"); // Close library drawer on load
+                    sidebar.classList.add("collapsed");
                 });
             });
         }
@@ -824,12 +829,11 @@ Target Category: ${activeIntent.toUpperCase()}`;
         );
     }
 
-    // Helper to auto-copy to clipboard before navigating
     function handleAgentClick(e) {
         const text = promptOutput.value.trim();
         if (text) {
             navigator.clipboard.writeText(text).then(() => {
-                showToast("Prompt copied! Redirecting...");
+                showToast("Copied to clipboard! Launching agent...");
             }).catch(err => {
                 console.error("Copy failed", err);
             });
@@ -958,7 +962,7 @@ Target Category: ${activeIntent.toUpperCase()}`;
     }
 
     // -------------------------------------------------------------
-    // 11. Technical AI Neural Data-Flow Background Canvas
+    // 11. Cyber Neural Grid Background Canvas
     // -------------------------------------------------------------
     function initBgAnimation() {
         const canvas = document.getElementById("bg-canvas");
@@ -966,21 +970,24 @@ Target Category: ${activeIntent.toUpperCase()}`;
         const ctx = canvas.getContext("2d");
         
         let nodes = [];
-        let pulses = [];
-        let floatingGlyphs = [];
-        let maxNodes = 45;
-        const connectionDist = 140;
+        let connections = [];
+        let maxNodes = 50;
         let mouseX = -1000;
         let mouseY = -1000;
         
-        const aiGlyphs = ["01", "10", "λ", "Σ", "f(x)", "AI", "GPT", "θ", "∇", "1", "0"];
+        // AI themed tokens floating in background
+        const aiTerms = [
+            "NeuralNet", "f(x)", "[0.98]", "Weights", "Token", 
+            "API", "Tensor", "LLM", "Prompt", "Matrix", "Sigmoid"
+        ];
+        let termObjects = [];
 
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            maxNodes = window.innerWidth < 768 ? 18 : 45;
+            maxNodes = window.innerWidth < 768 ? 20 : 50;
             populateNodes();
-            populateGlyphs();
+            populateTerms();
         }
         window.addEventListener("resize", resize);
 
@@ -994,14 +1001,19 @@ Target Category: ${activeIntent.toUpperCase()}`;
                 mouseY = e.touches[0].clientY;
             }
         });
+        window.addEventListener("mouseleave", () => {
+            mouseX = -1000;
+            mouseY = -1000;
+        });
 
-        class NeuralNode {
+        class Node {
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.vx = (Math.random() - 0.5) * 0.4;
-                this.vy = (Math.random() - 0.5) * 0.4;
-                this.radius = Math.random() * 1.8 + 1.2;
+                this.vx = (Math.random() - 0.5) * 0.35;
+                this.vy = (Math.random() - 0.5) * 0.35;
+                this.radius = Math.random() * 2 + 1;
+                this.glowColor = Math.random() > 0.5 ? "rgba(0, 242, 254, " : "rgba(155, 81, 224, ";
             }
             update() {
                 this.x += this.vx;
@@ -1012,46 +1024,46 @@ Target Category: ${activeIntent.toUpperCase()}`;
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = "rgba(56, 189, 248, 0.4)";
+                ctx.fillStyle = this.glowColor + "0.65)";
                 ctx.fill();
             }
         }
 
-        class FloatingGlyph {
+        class Term {
             constructor() {
                 this.reset();
             }
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = canvas.height + Math.random() * 50;
-                this.vy = - (Math.random() * 0.4 + 0.2);
-                this.char = aiGlyphs[Math.floor(Math.random() * aiGlyphs.length)];
-                this.opacity = Math.random() * 0.2 + 0.05;
-                this.size = Math.floor(Math.random() * 6 + 10);
+                this.vy = - (Math.random() * 0.25 + 0.15);
+                this.text = aiTerms[Math.floor(Math.random() * aiTerms.length)];
+                this.opacity = Math.random() * 0.12 + 0.04;
+                this.size = Math.floor(Math.random() * 5 + 10);
             }
             update() {
                 this.y += this.vy;
                 if (this.y < -20) this.reset();
             }
             draw() {
-                ctx.font = `${this.size}px 'Inter', monospace`;
-                ctx.fillStyle = `rgba(129, 140, 248, ${this.opacity})`;
-                ctx.fillText(this.char, this.x, this.y);
+                ctx.font = `600 ${this.size}px 'Share Tech Mono', monospace`;
+                ctx.fillStyle = `rgba(0, 242, 254, ${this.opacity})`;
+                ctx.fillText(this.text, this.x, this.y);
             }
         }
 
         function populateNodes() {
             nodes = [];
             for (let i = 0; i < maxNodes; i++) {
-                nodes.push(new NeuralNode());
+                nodes.push(new Node());
             }
         }
 
-        function populateGlyphs() {
-            floatingGlyphs = [];
-            const glyphCount = window.innerWidth < 768 ? 10 : 20;
-            for (let i = 0; i < glyphCount; i++) {
-                floatingGlyphs.push(new FloatingGlyph());
+        function populateTerms() {
+            termObjects = [];
+            const count = window.innerWidth < 768 ? 6 : 15;
+            for (let i = 0; i < count; i++) {
+                termObjects.push(new Term());
             }
         }
 
@@ -1060,73 +1072,49 @@ Target Category: ${activeIntent.toUpperCase()}`;
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            for (let i = 0; i < floatingGlyphs.length; i++) {
-                floatingGlyphs[i].update();
-                floatingGlyphs[i].draw();
-            }
+            // Draw floating AI terms
+            termObjects.forEach(term => {
+                term.update();
+                term.draw();
+            });
 
-            for (let i = 0; i < nodes.length; i++) {
-                const n1 = nodes[i];
+            // Draw neural nodes
+            nodes.forEach((n1, idx) => {
                 n1.update();
                 n1.draw();
 
-                const mouseDx = n1.x - mouseX;
-                const mouseDy = n1.y - mouseY;
-                const mouseDist = Math.sqrt(mouseDx * mouseDx + mouseDy * mouseDy);
-                if (mouseDist < 160) {
-                    const alpha = (1 - mouseDist / 160) * 0.35;
+                // Mouse interaction glow lines
+                const mDx = n1.x - mouseX;
+                const mDy = n1.y - mouseY;
+                const mDist = Math.sqrt(mDx * mDx + mDy * mDy);
+                if (mDist < 160) {
+                    const alpha = (1 - mDist / 160) * 0.3;
                     ctx.beginPath();
                     ctx.moveTo(n1.x, n1.y);
                     ctx.lineTo(mouseX, mouseY);
-                    ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`;
-                    ctx.lineWidth = 1.2;
+                    ctx.strokeStyle = `rgba(0, 242, 254, ${alpha})`;
+                    ctx.lineWidth = 1.0;
                     ctx.stroke();
                 }
 
-                for (let j = i + 1; j < nodes.length; j++) {
+                // Connect adjacent nodes
+                for (let j = idx + 1; j < nodes.length; j++) {
                     const n2 = nodes[j];
                     const dx = n1.x - n2.x;
                     const dy = n1.y - n2.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
 
-                    if (dist < connectionDist) {
-                        const alpha = (1 - dist / connectionDist) * 0.2;
+                    if (dist < 140) {
+                        const alpha = (1 - dist / 140) * 0.16;
                         ctx.beginPath();
                         ctx.moveTo(n1.x, n1.y);
                         ctx.lineTo(n2.x, n2.y);
-                        ctx.strokeStyle = `rgba(129, 140, 248, ${alpha})`;
-                        ctx.lineWidth = 0.8;
+                        ctx.strokeStyle = n1.glowColor + `${alpha})`;
+                        ctx.lineWidth = 0.7;
                         ctx.stroke();
-
-                        if (Math.random() < 0.003) {
-                            pulses.push({
-                                x: n1.x, y: n1.y,
-                                targetX: n2.x, targetY: n2.y,
-                                progress: 0
-                            });
-                        }
                     }
                 }
-            }
-
-            for (let i = pulses.length - 1; i >= 0; i--) {
-                const p = pulses[i];
-                p.progress += 0.04;
-                const currX = p.x + (p.targetX - p.x) * p.progress;
-                const currY = p.y + (p.targetY - p.y) * p.progress;
-
-                ctx.beginPath();
-                ctx.arc(currX, currY, 2, 0, Math.PI * 2);
-                ctx.fillStyle = "rgba(56, 189, 248, 0.8)";
-                ctx.shadowColor = "#38bdf8";
-                ctx.shadowBlur = 8;
-                ctx.fill();
-                ctx.shadowBlur = 0;
-
-                if (p.progress >= 1) {
-                    pulses.splice(i, 1);
-                }
-            }
+            });
 
             requestAnimationFrame(animate);
         }
