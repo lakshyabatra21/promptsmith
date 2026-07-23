@@ -43,6 +43,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const savedCount = document.getElementById("saved-count");
     const clearHistoryBtn = document.getElementById("clear-history-btn");
 
+    // AI Agent Launcher Links
+    const linkChatgpt = document.querySelector(".link-chatgpt");
+    const linkClaude = document.querySelector(".link-claude");
+    const linkGemini = document.querySelector(".link-gemini");
+    const linkCopilot = document.querySelector(".link-copilot");
+
     // Speech-to-Text State
     let recognition = null;
     let isListening = false;
@@ -122,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updateBadgeState();
     }
 
-    // Intent Detector for Auto-Detect fallback
+    // Intent Detector
     function detectIntent(userSentence) {
         const text = userSentence.toLowerCase();
 
@@ -139,6 +145,20 @@ document.addEventListener("DOMContentLoaded", () => {
             return "learning";
         }
         return "general";
+    }
+
+    // Dynamic Complexity Analyzer
+    function getComplexity(userIdea) {
+        const text = userIdea.toLowerCase();
+        const wordCount = userIdea.split(/\s+/).length;
+        
+        // Advanced keywords indicating complex systems
+        const hasAdvancedKeywords = text.match(/production|modular|architecture|scra|database|sql|optimize|scale|retries|pipeline|cinematic|hasselblad|lighting|rembrandt|kelvin|quantifiable|mckinsey|conversion|pedagog|first-principles|misconception/);
+        
+        if (wordCount >= 8 || hasAdvancedKeywords) {
+            return "advanced";
+        }
+        return "simple";
     }
 
     // -------------------------------------------------------------
@@ -404,24 +424,22 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         apiAbortController = new AbortController();
 
-        promptOutput.value = "Optimizing via Live AI... Please wait...";
+        promptOutput.value = "Thinking in real-time... Please wait...";
         promptOutput.style.opacity = "0.6";
 
-        let systemInstruction = `You are a Principal Prompt Architect. Your objective is to compile the user's raw idea into the absolute highest quality prompt in the world. 
-Structure the prompt systematically using the CO-STAR framework:
+        const complexity = getComplexity(userIdea);
 
-1. [ROLE & EXPERT PROFILE]: Assign a specific, authoritative expert role (e.g. "Act as a Principal System Engineer...").
-2. [CONTEXT & OBJECTIVE]: Clearly detail the background and target deliverables.
-3. [STYLE & TONE]: Enforce a professional, clear, and direct instruction tone.
-4. [TECHNICAL CONSTRAINTS & EDGE CASES]: Specify strict boundaries, quality rules, and error-handling steps appropriate for this domain (${activeIntent.toUpperCase()}).
-5. [RESPONSE FORMATTING]: Define clear markdown headers or organization schemas.
+        let systemInstruction = `You are a world-class prompt engineering thinker. Your goal is to transform the user's raw idea into a highly accurate, naturally written ChatGPT/Claude prompt.
 
-OUTPUT COMPLIANCE CRITICAL RULES:
-- Output ONLY the ready-to-run prompt text itself.
-- Do NOT output any introduction (like "Here is the prompt:"), conversational pleasantries, or code block formatting wrappers (\`\`\` or \`\`\`markdown).
-- The prompt must start directly with the role declaration.
+CRITICAL INSTRUCTIONS:
+1. Do NOT use rigid, pre-made structural headings like "[ROLE]", "[CONTEXT]", "[OBJECTIVE]" or "[CONSTRAINTS]". Write the prompt in a fluent, natural human tone.
+2. Analyze Complexity (Current Complexity Target: ${complexity.toUpperCase()}):
+   - If the idea is simple or normal, write a direct, concise, and highly focused prompt. Avoid adding bloated engineering instructions.
+   - If the idea is advanced, write a highly descriptive instruction set outlining specific performance standards and boundaries.
+3. Output ONLY the clean prompt itself. No introductions (e.g. "Here is your prompt:") or code block wrappers (\`\`\` or \`\`\`markdown). The prompt must start directly.
 
-User Raw Idea: "${userIdea}"`;
+User Raw Idea: "${userIdea}"
+Target Category: ${activeIntent.toUpperCase()}`;
 
         try {
             if (provider === "gemini") {
@@ -483,6 +501,7 @@ User Raw Idea: "${userIdea}"`;
 
             promptOutput.style.opacity = "1";
             updateStats();
+            updateLauncherLinks();
             addToHistoryDebounced(userIdea, activeIntent);
 
         } catch (err) {
@@ -496,116 +515,110 @@ User Raw Idea: "${userIdea}"`;
     }
 
     // -------------------------------------------------------------
-    // 7. Gold Standard Offline Local Prompt Templates Generator
+    // 7. Real-Time Dynamic Local Prompt Templates (Complexity Aware)
     // -------------------------------------------------------------
     function generateLocalTemplate(userIdea, activeIntent) {
         let promptText = "";
+        const complexity = getComplexity(userIdea);
 
         if (activeIntent === "photo") {
             const isEditing = userIdea.toLowerCase().match(/edit|change|remove|replace|modify/);
-            if (isEditing) {
-                promptText = `ACT AS A DIGITAL RETOUCHER AND PHOTOSHOP SPECIALIST. Modify the visual asset based on these parameters: "${userIdea}".
-
-TECHNICAL STEPS:
-1. Composition Alignment: Match ambient lighting angles, contrast indices, and edge shadows between old and new subjects.
-2. Background Blending: Feather edges of all replaced sections using a 1.5px radius mask to eliminate hard visual lines.
-3. Dynamic Shadows: Render contact shadows (dark, sharp base lines) and soft cast shadows matching the primary light source direction.
-4. Color Grading: Perform a color balance alignment matching the Kelvin temperature of the background color space.
-5. Deliver a step-by-step list of adjustments for manual execution in Photoshop (Exposure, Highlights, Shadows, Color balance).`;
+            if (complexity === "simple") {
+                if (isEditing) {
+                    promptText = `Modify this photo: "${userIdea}". Adjust exposure and lighting to blend the changes cleanly and ensure color tones match.`;
+                } else {
+                    promptText = `Generate a realistic photograph based on this concept: "${userIdea}". Shot on a premium camera, clean cinematic lighting, rich colors, highly detailed.`;
+                }
             } else {
-                promptText = `ACT AS A WORLD-CLASS PHOTOGRAPHER AND MIDJOURNEY ART DIRECTOR. Generate an ultra-detailed image prompt command for the concept: "${userIdea}".
-
-TECHNICAL PARAMETERS:
-1. Camera Setup: Shot on Hasselblad H6D-100c, 85mm f/1.4 prime lens, shallow depth of field, sharp subject focus.
-2. Lighting Profile: Cinematic Rembrandt lighting, dramatic low-key contrast, warm golden hour backlighting, and volumetric mist.
-3. Texture Detail: Hyperrealistic skin pores, detailed surface textures, floating micro-dust, and reflections.
-4. Color Grade: Warm amber tones and cool teal shadows.
-5. Commands: Output only the instruction command starting with "/imagine prompt: ${userIdea}, Hasselblad..." followed by "--ar 16:9 --style raw --v 6.0".`;
+                if (isEditing) {
+                    promptText = `Act as a professional digital retoucher. Modify this photo matching these details: "${userIdea}". Ensure composition alignment, match ambient Kelvin temperature, blend replaced masks using a feathered 1.5px boundary, and render soft contact and cast shadows matching the primary light direction.`;
+                } else {
+                    promptText = `Act as an art director. Create a Midjourney image command for: "${userIdea}". Output only: /imagine prompt: ${userIdea}, shot on Hasselblad H6D-100c, 85mm f/1.4 lens, Rembrandt portrait lighting, volumetric haze, cinematic color grading, teal and orange palette, highly detailed --ar 16:9 --style raw --v 6.0`;
+                }
             }
         }
         else if (activeIntent === "coding") {
-            let language = "modern code";
-            if (userIdea.toLowerCase().match(/python/)) language = "Python 3.11+";
-            else if (userIdea.toLowerCase().match(/javascript|js/)) language = "modern ES6+ JavaScript";
-            else if (userIdea.toLowerCase().match(/react/)) language = "React 18";
-            else if (userIdea.toLowerCase().match(/html|css/)) language = "semantic HTML5 & CSS Grid layouts";
-            else if (userIdea.toLowerCase().match(/sql/)) language = "PostgreSQL optimized queries";
+            let language = "code";
+            if (userIdea.toLowerCase().match(/python/)) language = "Python";
+            else if (userIdea.toLowerCase().match(/javascript|js/)) language = "JavaScript";
+            else if (userIdea.toLowerCase().match(/react/)) language = "React";
+            else if (userIdea.toLowerCase().match(/html|css/)) language = "HTML & CSS";
+            else if (userIdea.toLowerCase().match(/sql/)) language = "SQL";
 
-            let details = "";
-            if (userIdea.toLowerCase().match(/scrape|scraper/)) {
-                details = `
-- Implement rotating User-Agents and HTTP request headers to prevent anti-bot bans.
-- Wrap all network loops in try-catch statements managing HTTP 403, 429, and timeouts.
-- Implement a 1.5s rate-limit delay between recursive requests.
-- Export all parsed data structures into clean CSV formats.`;
-            } else if (userIdea.toLowerCase().match(/react|app|web/)) {
-                details = `
-- Write clean functional components utilizing React Hooks (useState, useEffect).
-- Keep components modular and memoize performance-heavy calculations with useMemo.
-- Ensure layouts are fully responsive and meet accessibility guidelines (ARIA labels).`;
-            } else if (userIdea.toLowerCase().match(/sql|database/)) {
-                details = `
-- Provide SQL performance indexing recommendations for queried fields.
-- Avoid nested subqueries; use JOIN operations or Common Table Expressions (CTEs).`;
+            if (complexity === "simple") {
+                promptText = `Write a clean, readable, and optimized ${language} implementation for: "${userIdea}". Include brief comments and a usage example.`;
+            } else {
+                let details = "";
+                if (userIdea.toLowerCase().match(/scrape|scraper/)) {
+                    details = " Implement rotating User-Agents, custom request headers, and try-except error management for 403/429 limits. Add a 1.5s delay rate-limit.";
+                } else if (userIdea.toLowerCase().match(/react|app|web/)) {
+                    details = " Write modular functional components, manage state correctly with hooks, implement performance memoization, and ensure full mobile responsiveness.";
+                }
+                promptText = `Act as a senior software architect. Implement a production-grade, highly optimized, and modular solution in ${language} for: "${userIdea}".${details} Wrap operations in try-catch structures for error validation, maintain dry coding rules, and output a copy-pasteable script with a runnable test case.`;
             }
-
-            promptText = `ACT AS A PRINCIPAL SOFTWARE ARCHITECT. Write a production-grade, highly optimized modular solution in ${language} for: "${userIdea}".
-${details}
-STANDARDS:
-1. Naming: Maintain strict camelCase/snake_case naming conventions and dry structure.
-2. Safety: Wrap code in try-catch/try-except statements handling file I/O or network failures.
-3. Cleanliness: Provide clear, descriptive inline comments.
-4. Deliverable: Output a single copy-pasteable script including a mock runnable test case. Do NOT write introductions or explanations.`;
         } 
         else if (activeIntent === "business") {
             const isEmail = userIdea.toLowerCase().match(/email|outreach|message/);
-            if (isEmail) {
-                promptText = `ACT AS A CONVERSION COPYWRITER. Write a high-converting cold outreach email based on this objective: "${userIdea}".
-
-STRUCTURE CONSTRAINTS:
-1. Subject Lines: Provide 3 optimized subject lines under 6 words targeting high open rates.
-2. Hook: Open with a personalized value hook statement in the first 2 sentences. No conversational filler.
-3. Metrics: Bullet point 2 quantifiable achievements (e.g. "reduced server latency by 35%").
-4. CTA: Close with a low-friction scheduling question.
-5. Limit total email length to under 150 words.`;
+            if (complexity === "simple") {
+                if (isEmail) {
+                    promptText = `Write a short, engaging cold email outreach based on: "${userIdea}". Keep it friendly, direct, and under 120 words with a clear call to action.`;
+                } else {
+                    promptText = `Provide a clear, brief business plan addressing: "${userIdea}". List the main steps and key goals.`;
+                }
             } else {
-                promptText = `ACT AS A STRATEGIC MANAGEMENT CONSULTANT. Formulate a professional business deliverable for the request: "${userIdea}".
-
-STRUCTURE CONSTRAINTS:
-1. Executive Summary: Deliver a 3-sentence project objective.
-2. Implementation Roadmap: Deliver a step-by-step milestone timeline.
-3. Success Metrics: Define 3 key performance indicators (KPIs) to track.
-4. Risk Profile: Outline 2 operational risks and mitigation plans.`;
+                if (isEmail) {
+                    promptText = `Act as a conversion copywriter. Write a high-converting cold email campaign based on: "${userIdea}". Offer 3 short subject lines (<6 words), open with an immediate personalized value hook statement, list 2 quantifiable achievement metrics, end with a single low-barrier call to action, and keep it under 150 words.`;
+                } else {
+                    promptText = `Act as a management consultant. Formulate a structured business analysis framework for: "${userIdea}". Provide a clear executive summary, a milestone implementation timeline, 3 performance tracking KPIs, and outline 2 operational risks with mitigation plans.`;
+                }
             }
         }
         else if (activeIntent === "learning") {
-            promptText = `ACT AS A FIRST-PRINCIPLES PEDAGOGIST. Explain this concept step-by-step: "${userIdea}".
-
-DELIVERABLE LAYOUT:
-1. Baseline: Explain the core concept simply to a 10-year-old child in 2 sentences.
-2. Metaphor: Map the concept mechanics onto a familiar everyday object or system (e.g. water pipes/cooking recipes).
-3. Technical Terms: Explain the top 3 specialized terms simply.
-4. Misconceptions: Correct 2 common myths people make when studying this.
-5. Quiz: End with a 2-question self-check.`;
+            if (complexity === "simple") {
+                promptText = `Explain this concept simply in plain English: "${userIdea}". Use an intuitive, real-world metaphor to make it easy to understand.`;
+            } else {
+                promptText = `Act as an educator. Explain the concept "${userIdea}" using first principles. Start with an ELI5 simple breakdown, map its mechanics to a familiar real-world metaphor, clarify the top 3 core technical terminologies, debunk 2 common misconceptions, and provide a 2-question self-check quiz.`;
+            }
         }
         else {
-            promptText = `ACT AS A SENIOR SUBJECT MATTER EXPERT. Deliver a highly detailed, professional execution plan for: "${userIdea}".
-
-DELIVERABLE LAYOUT:
-1. Executive Summary: Deliver a concise overview of the solution.
-2. Technical Roadmap: Outline a step-by-step implementation guide covering all prerequisites.
-3. Practical Application: Highlight 2 concrete examples of how this is applied in industry.
-4. Format: Use clean markdown headers, bold terms, and structured list items. Avoid conversational greetings and start directly with the analysis.`;
+            if (complexity === "simple") {
+                promptText = `Provide a direct, accurate response answering: "${userIdea}". Keep it concise and formatted with simple bullet points.`;
+            } else {
+                promptText = `Act as a subject matter expert. Deliver a structured execution plan for: "${userIdea}". Provide an executive summary, a detailed roadmap covering prerequisites, highlight 2 practical industry use cases, and use clean markdown layout structure.`;
+            }
         }
 
         promptOutput.value = promptText;
         updateStats();
+        updateLauncherLinks();
         addToHistoryDebounced(userIdea, activeIntent);
     }
 
     // -------------------------------------------------------------
-    // Main Orchestrator
+    // Dynamic Pre-Filled URL Links Constructor
     // -------------------------------------------------------------
+    function updateLauncherLinks() {
+        const text = promptOutput.value.trim();
+        if (!text) {
+            // Restore default base links
+            linkChatgpt.href = "https://chatgpt.com";
+            linkClaude.href = "https://claude.ai";
+            linkGemini.href = "https://gemini.google.com";
+            linkCopilot.href = "https://copilot.microsoft.com";
+            return;
+        }
+
+        const encodedText = encodeURIComponent(text);
+
+        // Pre-fill query links
+        linkChatgpt.href = `https://chatgpt.com/?q=${encodedText}`;
+        linkGemini.href = `https://gemini.google.com/app?prompt=${encodedText}`;
+        linkCopilot.href = `https://copilot.microsoft.com/?q=${encodedText}`;
+        // Claude does not support URL parameters, we keep standard URL but copy prompt automatically on click
+        linkClaude.href = "https://claude.ai";
+    }
+
+    // Main Orchestrator
     function generateMasterPrompt() {
         const userIdea = conceptInput.value.trim();
         if (!userIdea) {
@@ -613,6 +626,7 @@ DELIVERABLE LAYOUT:
             copyBtn.disabled = true;
             saveLibraryBtn.disabled = true;
             updateStats();
+            updateLauncherLinks();
             return;
         }
         copyBtn.disabled = false;
@@ -769,6 +783,7 @@ DELIVERABLE LAYOUT:
         updateClearBtnVisibility();
         promptOutput.value = item.prompt;
         updateStats();
+        updateLauncherLinks();
         showToast("Saved prompt loaded!");
     }
 
@@ -807,6 +822,18 @@ DELIVERABLE LAYOUT:
                 '"': '&quot;'
             }[tag] || tag)
         );
+    }
+
+    // Helper to auto-copy to clipboard before navigating
+    function handleAgentClick(e) {
+        const text = promptOutput.value.trim();
+        if (text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Prompt copied! Redirecting...");
+            }).catch(err => {
+                console.error("Copy failed", err);
+            });
+        }
     }
 
     // -------------------------------------------------------------
@@ -882,6 +909,11 @@ DELIVERABLE LAYOUT:
 
         copyBtn.addEventListener("click", copyPrompt);
         resetBtn.addEventListener("click", resetForm);
+
+        // Click handlers on launcher links to perform auto-copy to clipboard
+        document.querySelectorAll(".agent-btn").forEach(btn => {
+            btn.addEventListener("click", handleAgentClick);
+        });
     }
 
     function copyPrompt() {
